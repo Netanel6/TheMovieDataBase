@@ -4,15 +4,25 @@ import android.provider.Settings.Global.getString
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -27,20 +37,28 @@ import com.netanel.tmdb.domain.movie.model.Movie
  * NetanelCA2@gmail.com
  */
 
+
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MovieItem(movie: Movie) {
-    Column(Modifier.wrapContentSize()) {
-        GlideImage(
-            model = Constants.IMAGES_URL.plus(movie.posterPath),
-            contentDescription = movie.originalTitle,
-            modifier = Modifier.size(440.dp),
-            alignment = Alignment.Center,
-            contentScale = ContentScale.None
-        )
+    Card(Modifier.wrapContentSize()) {
+        Column {
+            GlideImage(
+                model = Constants.IMAGES_URL.plus(movie.posterPath),
+                contentDescription = movie.title,
+                modifier = Modifier.size(width = 200.dp, height = 300.dp),
+                alignment = Alignment.Center,
+                contentScale = ContentScale.Crop
+            )
+            Text(
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(4.dp).width(200.dp),
+                text = "${movie.title} (${movie.originalTitle})"
+            )
+        }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
 fun MovieItemPreview() {
