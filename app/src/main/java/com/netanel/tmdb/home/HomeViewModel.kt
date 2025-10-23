@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.netanel.tmdb.domain.movie.model.Movie
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,8 +27,8 @@ sealed class MoviesUiState {
 class HomeViewModel @Inject constructor(private val getNowPlayingUseCase: GetNowPlayingUseCase) :
     ViewModel() {
 
-    private val _uiState: MutableStateFlow<MoviesUiState?> = MutableStateFlow(MoviesUiState.Loading)
-    val uiState = _uiState.asStateFlow()
+    private val _uiState: MutableStateFlow<MoviesUiState> = MutableStateFlow(MoviesUiState.Loading)
+    val uiState: StateFlow<MoviesUiState> = _uiState.asStateFlow()
 
     init {
         loadMovies()

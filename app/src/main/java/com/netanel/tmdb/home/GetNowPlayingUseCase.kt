@@ -1,6 +1,5 @@
 package com.netanel.tmdb.home
 
-import com.netanel.tmdb.domain.Constants
 import com.netanel.tmdb.domain.movie.model.MovieResponse
 import javax.inject.Inject
 
