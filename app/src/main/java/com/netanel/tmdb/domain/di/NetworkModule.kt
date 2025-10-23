@@ -1,7 +1,6 @@
 package com.netanel.tmdb.domain.di
 
 import com.netanel.tmdb.domain.Constants
-import com.netanel.tmdb.domain.image.ImageApi
 import com.netanel.tmdb.domain.movie.MovieApi
 import dagger.Module
 import dagger.Provides
@@ -9,7 +8,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -68,12 +66,5 @@ object NetworkModule {
     @Singleton
     fun provideMovieApi(retrofit: Retrofit): MovieApi {
         return retrofit.create(MovieApi::class.java)
-    }
-
-    // 🔹 Image API
-    @Provides
-    @Singleton
-    fun provideImageApi(retrofit: Retrofit): ImageApi {
-        return retrofit.create(ImageApi::class.java)
     }
 }
