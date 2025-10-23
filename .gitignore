@@ -13,3 +13,12 @@
 .externalNativeBuild
 .cxx
 local.properties
+.idea/misc.xml
+.idea/migrations.xml
+.idea/.name
+.idea/AndroidProjectSystem.xml
+.idea/appInsightsSettings.xml
+.idea/compiler.xml
+.idea/deploymentTargetSelector.xml
+.idea/gradle.xml
+.idea/runConfigurations.xml
