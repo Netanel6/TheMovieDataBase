@@ -1,8 +1,10 @@
-package com.netanel.tmdb.domain.model
+package com.netanel.tmdb.domain.movie.model
 
+import com.google.gson.annotations.SerializedName
 import com.netanel.tmdb.utils.LocalDateSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import okhttp3.Response
 import java.time.LocalDate
 
 
@@ -13,68 +15,66 @@ import java.time.LocalDate
 @Serializable
 data class MovieResponse(
     val results: List<Movie>,
-    @SerialName("dates")
+    @SerializedName("dates")
     val date: MovieDates,
     val page: Int,
-    @SerialName("total_pages")
+    @SerializedName("total_pages")
     val totalPages: Int,
-    @SerialName("total_results")
+    @SerializedName("total_results")
     val totalResults: Int
 )
 
 @Serializable
 data class MovieDates(
-    @Serializable(with = LocalDateSerializer::class)
-    @SerialName("maximum")
-    val maximumDate: LocalDate,
+    @SerializedName("maximum")
+    val maximumDate: String,
 
-    @Serializable(with = LocalDateSerializer::class)
-    @SerialName("minimum")
-    val minimumDate: LocalDate
+    @SerializedName("minimum")
+    val minimumDate: String
 )
 
 
 @Serializable
 data class Movie(
-    @SerialName("adult")
+    @SerializedName("adult")
     val isAdult: Boolean,
 
-    @SerialName("backdrop_path")
+    @SerializedName("backdrop_path")
     val backdropPath: String?,
 
-    @SerialName("genre_ids")
+    @SerializedName("genre_ids")
     val genreIds: List<Int>,
 
-    @SerialName("id")
+    @SerializedName("id")
     val id: Int,
 
-    @SerialName("original_language")
+    @SerializedName("original_language")
     val originalLanguage: String,
 
-    @SerialName("original_title")
+    @SerializedName("original_title")
     val originalTitle: String,
 
-    @SerialName("overview")
+    @SerializedName("overview")
     val overview: String,
 
-    @SerialName("popularity")
+    @SerializedName("popularity")
     val popularity: Double,
 
-    @SerialName("poster_path")
+    @SerializedName("poster_path")
     val posterPath: String?,
 
-    @SerialName("release_date")
+    @SerializedName("release_date")
     val releaseDate: String,
 
-    @SerialName("title")
+    @SerializedName("title")
     val title: String,
 
-    @SerialName("video")
+    @SerializedName("video")
     val isVideo: Boolean,
 
-    @SerialName("vote_average")
+    @SerializedName("vote_average")
     val voteAverage: Double,
 
-    @SerialName("vote_count")
+    @SerializedName("vote_count")
     val voteCount: Int
 )
