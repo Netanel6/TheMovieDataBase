@@ -2,6 +2,7 @@ package com.netanel.tmdb.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -58,18 +59,25 @@ private fun HomeScreenContent(
                 if (state.movies.isEmpty()) {
                     Text(text = "No movies available right now.")
                 } else {
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight(),
-                        contentPadding = PaddingValues(all = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        items(
-                            items = state.movies,
-                            key = { movie -> movie.id }
-                        ) { movie ->
-                            MovieItem(movie = movie)
+                    Column {
+                        Text(
+                            text = "Now Playing 🎬",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight(),
+                            contentPadding = PaddingValues(all = 4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            items(
+                                items = state.movies,
+                                key = { movie -> movie.id }
+                            ) { movie ->
+                                MovieItem(movie = movie)
+                            }
                         }
                     }
                 }
