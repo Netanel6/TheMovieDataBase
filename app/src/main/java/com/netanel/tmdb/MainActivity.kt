@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TMDBTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    HomeScreen(modifier = Modifier.padding(innerPadding))
+                    HomeScreen(modifier = Modifier)
                 }
             }
         }

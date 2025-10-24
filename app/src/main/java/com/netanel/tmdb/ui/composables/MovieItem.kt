@@ -34,14 +34,14 @@ fun MovieItem(movie: Movie) {
             GlideImage(
                 model = Constants.IMAGES_URL.plus(movie.posterPath),
                 contentDescription = movie.title,
-                modifier = Modifier.size(width = 440.dp, height = 440.dp),
+                modifier = Modifier.size(width = 120.dp, height = 120.dp),
                 alignment = Alignment.Center,
                 contentScale = ContentScale.FillWidth
             )
             Text(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.width(440.dp),
+                modifier = Modifier.width(120.dp),
                 textAlign = TextAlign.Center,
                 text = "${movie.title} (${movie.originalTitle})"
             )
