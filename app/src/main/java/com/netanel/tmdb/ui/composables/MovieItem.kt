@@ -1,33 +1,25 @@
 package com.netanel.tmdb.ui.composables
 
-import android.provider.Settings.Global.getString
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.netanel.tmdb.R
 import com.netanel.tmdb.domain.Constants
 import com.netanel.tmdb.domain.movie.model.Movie
 
@@ -42,23 +34,46 @@ import com.netanel.tmdb.domain.movie.model.Movie
 @Composable
 fun MovieItem(movie: Movie) {
     Card(Modifier.wrapContentSize()) {
-        Column {
-            GlideImage(
-                model = Constants.IMAGES_URL.plus(movie.posterPath),
-                contentDescription = movie.title,
-                modifier = Modifier.size(width = 200.dp, height = 300.dp),
-                alignment = Alignment.Center,
-                contentScale = ContentScale.Crop
-            )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            val posterPath = movie.posterPath
+            if (posterPath != null) {
+                GlideImage(
+                    model = Constants.IMAGES_URL + posterPath,
+                    contentDescription = movie.title,
+                    modifier = Modifier.size(width = 120.dp, height = 180.dp),
+                    alignment = Alignment.Center,
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(width = 120.dp, height = 180.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No image",
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(8.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
             Text(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(4.dp).width(200.dp),
+                modifier = Modifier
+                    .width(120.dp)
+                    .padding(vertical = 8.dp),
+                textAlign = TextAlign.Center,
                 text = "${movie.title} (${movie.originalTitle})"
             )
         }
     }
 }
+
+
 @Preview(showBackground = true)
 @Composable
 fun MovieItemPreview() {

@@ -1,13 +1,7 @@
 package com.netanel.tmdb.home
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,11 +9,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.netanel.tmdb.composables.HeroSection
+import com.netanel.tmdb.composables.HorizontalMoviesList
 import com.netanel.tmdb.domain.movie.model.Movie
-import com.netanel.tmdb.ui.composables.MovieItem
 import com.netanel.tmdb.ui.theme.TMDBTheme
 
 /**
@@ -42,7 +36,7 @@ private fun HomeScreenContent(
     state: MoviesUiState,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    Column(
         modifier = modifier.fillMaxSize()
     ) {
         when (state) {
@@ -55,31 +49,20 @@ private fun HomeScreenContent(
             }
 
             is MoviesUiState.Success -> {
-                if (state.movies.isEmpty()) {
-                    Text(text = "No movies available right now.")
-                } else {
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight(),
-                        contentPadding = PaddingValues(all = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        items(
-                            items = state.movies,
-                            key = { movie -> movie.id }
-                        ) { movie ->
-                            MovieItem(movie = movie)
-                        }
-                    }
+                val mostWatchedMovie = state.movies.maxByOrNull { it.voteAverage }
+                HeroSection(mostWatchedMovie) {
+                    // TODO: Move to Details Screen
                 }
+                HorizontalMoviesList(state = state)
             }
         }
     }
 }
 
 
-@Preview(showBackground = true)
+
+
+@Preview(showBackground = true, device = Devices.PIXEL_7)
 @Composable
 private fun HomeScreenLoadingPreview() {
     TMDBTheme {
@@ -125,3 +108,4 @@ private val previewMovie = Movie(
     voteAverage = 7.854,
     voteCount = 305
 )
+
