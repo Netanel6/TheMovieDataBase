@@ -36,8 +36,8 @@ private fun HomeScreenContent(
     state: MoviesUiState,
     modifier: Modifier = Modifier
 ) {
-    Column (
-        modifier = modifier.fillMaxSize(),
+    Column(
+        modifier = modifier.fillMaxSize()
     ) {
         when (state) {
             MoviesUiState.Loading -> {
@@ -50,9 +50,9 @@ private fun HomeScreenContent(
 
             is MoviesUiState.Success -> {
                 val mostWatchedMovie = state.movies.maxByOrNull { it.voteAverage }
-                HeroSection(mostWatchedMovie, {
+                HeroSection(mostWatchedMovie) {
                     // TODO: Move to Details Screen
-                })
+                }
                 HorizontalMoviesList(state = state)
             }
         }
@@ -108,3 +108,4 @@ private val previewMovie = Movie(
     voteAverage = 7.854,
     voteCount = 305
 )
+

@@ -1,9 +1,13 @@
 package com.netanel.tmdb.ui.composables
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,24 +34,45 @@ import com.netanel.tmdb.domain.movie.model.Movie
 @Composable
 fun MovieItem(movie: Movie) {
     Card(Modifier.wrapContentSize()) {
-        Column {
-            GlideImage(
-                model = Constants.IMAGES_URL.plus(movie.posterPath),
-                contentDescription = movie.title,
-                modifier = Modifier.size(width = 120.dp, height = 120.dp),
-                alignment = Alignment.Center,
-                contentScale = ContentScale.FillWidth
-            )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            val posterPath = movie.posterPath
+            if (posterPath != null) {
+                GlideImage(
+                    model = Constants.IMAGES_URL + posterPath,
+                    contentDescription = movie.title,
+                    modifier = Modifier.size(width = 120.dp, height = 180.dp),
+                    alignment = Alignment.Center,
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(width = 120.dp, height = 180.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No image",
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(8.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
             Text(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.width(120.dp),
+                modifier = Modifier
+                    .width(120.dp)
+                    .padding(vertical = 8.dp),
                 textAlign = TextAlign.Center,
                 text = "${movie.title} (${movie.originalTitle})"
             )
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

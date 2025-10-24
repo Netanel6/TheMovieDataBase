@@ -31,17 +31,22 @@ import com.netanel.tmdb.domain.movie.model.Movie
 @Composable
 fun HeroSection(movie: Movie?, onDetailsClick: (movie: Movie) -> Unit) {
     val context = LocalContext.current
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(400.dp)
     ) {
-        GlideImage(
-            model = Constants.IMAGES_URL.plus(movie?.backdropPath),
-            contentDescription = movie?.title,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
+        val highlightedMovie = movie
+        val backdrop = highlightedMovie?.backdropPath
+        if (backdrop != null) {
+            GlideImage(
+                model = Constants.IMAGES_URL + backdrop,
+                contentDescription = highlightedMovie.title,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
 
         Box(
             modifier = Modifier
@@ -62,30 +67,33 @@ fun HeroSection(movie: Movie?, onDetailsClick: (movie: Movie) -> Unit) {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            val title = highlightedMovie?.title
             Text(
-                text = movie?.title.toString(),
+                text = title ?: "No featured movie available",
                 color = Color.White,
                 style = MaterialTheme.typography.headlineMedium
             )
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-
-                if (movie?.isVideo == true) {
-                    Button(onClick = {
-                        Toast.makeText(
-                            context,
-                            "Need to Implement Video Playing",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }) {
-                        Text("Play")
+            if (highlightedMovie != null) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    if (highlightedMovie.isVideo) {
+                        Button(onClick = {
+                            Toast.makeText(
+                                context,
+                                "Need to Implement Video Playing",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }) {
+                            Text("Play")
+                        }
                     }
-                }
-                OutlinedButton(onClick = { onDetailsClick(movie!!) }) {
-                    Text("Details")
+
+                    OutlinedButton(onClick = { onDetailsClick(highlightedMovie) }) {
+                        Text("Details")
+                    }
                 }
             }
         }
