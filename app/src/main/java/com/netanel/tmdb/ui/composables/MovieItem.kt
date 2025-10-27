@@ -33,7 +33,7 @@ import com.netanel.tmdb.domain.movie.model.Movie
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MovieItem(movie: Movie) {
-    Card(Modifier.wrapContentSize()) {
+    Card(Modifier.wrapContentSize().padding(8.dp)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             val posterPath = movie.posterPath
             if (posterPath != null) {

@@ -2,8 +2,7 @@ package com.netanel.tmdb.home
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -23,50 +22,56 @@ import com.netanel.tmdb.ui.theme.TMDBTheme
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier) {
     val homeViewModel: HomeViewModel = viewModel()
-    val state by homeViewModel.uiState.collectAsStateWithLifecycle()
+    val upcomingState by homeViewModel.upcomingUiState.collectAsStateWithLifecycle()
+    val nowPlayingState by homeViewModel.nowPlayingUiState.collectAsStateWithLifecycle()
+    val topRatedState by homeViewModel.topRatedUiState.collectAsStateWithLifecycle()
+    val popularState by homeViewModel.popularUiState.collectAsStateWithLifecycle()
+
+    val sections = listOf(
+        MovieSection("Upcoming", upcomingState),
+        MovieSection("Now Playing", nowPlayingState),
+        MovieSection("Top Rated", topRatedState),
+        MovieSection("Popular", popularState)
+    )
 
     HomeScreenContent(
-        state = state,
-        modifier = modifier
+        modifier = modifier,
+        sections = sections
     )
 }
 
 @Composable
 private fun HomeScreenContent(
-    state: MoviesUiState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    sections: List<MovieSection>
 ) {
-    Column(
-        modifier = modifier.fillMaxSize()
-    ) {
-        when (state) {
-            MoviesUiState.Loading -> {
-                CircularProgressIndicator()
-            }
+    Column(modifier = modifier.fillMaxSize()) {
+        val heroMovie = sections.firstOrNull { it.title == "Top Rated" }
+            ?.state
+            ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
 
-            is MoviesUiState.Error -> {
-                Text(text = state.message)
+        heroMovie?.let {
+            HeroSection(it) {
+                // TODO: Navigate to details
             }
+        }
 
-            is MoviesUiState.Success -> {
-                val mostWatchedMovie = state.movies.maxByOrNull { it.voteAverage }
-                HeroSection(mostWatchedMovie) {
-                    // TODO: Move to Details Screen
-                }
-                HorizontalMoviesList(state = state)
+        LazyColumn {
+            items(sections.size) { index ->
+                HorizontalMoviesList(section = sections[index])
             }
         }
     }
 }
 
 
-
-
 @Preview(showBackground = true, device = Devices.PIXEL_7)
 @Composable
 private fun HomeScreenLoadingPreview() {
     TMDBTheme {
-        HomeScreenContent(state = MoviesUiState.Loading)
+        HomeScreenContent(
+            sections = listOf()
+        )
     }
 }
 
@@ -75,9 +80,7 @@ private fun HomeScreenLoadingPreview() {
 private fun HomeScreenSuccessPreview() {
     TMDBTheme {
         HomeScreenContent(
-            state = MoviesUiState.Success(
-                movies = listOf(previewMovie, previewMovie.copy(id = 2, title = "Another Movie"))
-            )
+            sections = listOf()
         )
     }
 }
@@ -87,7 +90,7 @@ private fun HomeScreenSuccessPreview() {
 private fun HomeScreenErrorPreview() {
     TMDBTheme {
         HomeScreenContent(
-            state = MoviesUiState.Error(message = "Unable to load now playing movies")
+            sections = listOf()
         )
     }
 }
