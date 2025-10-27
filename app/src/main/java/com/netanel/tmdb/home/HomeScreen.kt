@@ -31,7 +31,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
     val sections = listOf(
         MovieSection(MovieSectionType.UPCOMING, upcomingState),
         MovieSection(MovieSectionType.NOW_PLAYING, nowPlayingState),
-        MovieSection(MovieSectionType.TOP_RATED, topRatedState),
+        MovieSection(MovieSectionType.TOP_RATED, topRatedState, true),
         MovieSection(MovieSectionType.POPULAR, popularState)
     )
 
@@ -47,10 +47,12 @@ private fun HomeScreenContent(
     sections: List<MovieSection>
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        val heroMovie = sections.firstOrNull { it.title == MovieSectionType.TOP_RATED }
-            ?.state
-            ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
+        val heroMovie = sections.firstNotNullOfOrNull { section ->
+            if (!section.isFeatured) return@firstNotNullOfOrNull null
 
+            val state = section.state as? UiState.Success ?: return@firstNotNullOfOrNull null
+            state.data.maxByOrNull { movie -> movie.voteAverage }
+        }
         heroMovie?.let {
             HeroSection(it) {
                 // TODO: Navigate to details

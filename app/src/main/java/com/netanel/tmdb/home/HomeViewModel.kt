@@ -116,7 +116,8 @@ sealed class UiState<out T> {
 
 data class MovieSection(
     val title: MovieSectionType,
-    val state: UiState<List<Movie>>
+    val state: UiState<List<Movie>>,
+    val isFeatured: Boolean = false
 ) {
     enum class MovieSectionType(val title: String) {
         UPCOMING("Upcoming"),
