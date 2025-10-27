@@ -80,4 +80,25 @@ dependencies {
     ksp(libs.glide.ksp)
 
     implementation(libs.androidx.navigation.compose)
+
+    // 🧩 Dependency Injection - Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+
+    // 🧭 Navigation Compose
+    implementation(libs.androidx.navigation.compose)
+
+    // 🧠 Hilt Navigation for Compose
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    // 🧬 Lifecycle & ViewModel integration
+    implementation(libs.androidx.lifecycle.runtimeCompose)
+    implementation(libs.androidx.lifecycle.viewmodelCompose)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.viewmodelSavedstate)
+
+    // 🧠 LiveData support in Compose (optional)
+    implementation(libs.androidx.compose.runtime.livedata)
+
 }
