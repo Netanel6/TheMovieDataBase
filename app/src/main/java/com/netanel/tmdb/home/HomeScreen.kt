@@ -8,8 +8,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.netanel.tmdb.composables.HeroSection
 import com.netanel.tmdb.composables.HorizontalMoviesList
 import com.netanel.tmdb.domain.movie.model.Movie
@@ -21,8 +21,8 @@ import com.netanel.tmdb.ui.theme.TMDBTheme
  * NetanelCA2@gmail.com
  */
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
-    val homeViewModel: HomeViewModel = viewModel()
+fun HomeScreen(modifier: Modifier = Modifier, onMovieDetailsClick: (Movie) -> Unit) {
+    val homeViewModel: HomeViewModel = hiltViewModel()
     val upcomingState by homeViewModel.upcomingUiState.collectAsStateWithLifecycle()
     val nowPlayingState by homeViewModel.nowPlayingUiState.collectAsStateWithLifecycle()
     val topRatedState by homeViewModel.topRatedUiState.collectAsStateWithLifecycle()
@@ -37,14 +37,16 @@ fun HomeScreen(modifier: Modifier = Modifier) {
 
     HomeScreenContent(
         modifier = modifier,
-        sections = sections
+        sections = sections,
+        onMovieDetailsClick = onMovieDetailsClick
     )
 }
 
 @Composable
 private fun HomeScreenContent(
     modifier: Modifier = Modifier,
-    sections: List<MovieSection>
+    sections: List<MovieSection>,
+    onMovieDetailsClick: (Movie) -> Unit
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         val heroMovie = sections.firstOrNull { it.title == MovieSectionType.TOP_RATED }
@@ -52,8 +54,8 @@ private fun HomeScreenContent(
             ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
 
         heroMovie?.let {
-            HeroSection(it) {
-                // TODO: Navigate to details
+            HeroSection(it) { clickedMovie ->
+                onMovieDetailsClick(clickedMovie)
             }
         }
 
@@ -71,7 +73,8 @@ private fun HomeScreenContent(
 private fun HomeScreenLoadingPreview() {
     TMDBTheme {
         HomeScreenContent(
-            sections = listOf()
+            sections = listOf(),
+            onMovieDetailsClick = {}
         )
     }
 }
@@ -81,7 +84,8 @@ private fun HomeScreenLoadingPreview() {
 private fun HomeScreenSuccessPreview() {
     TMDBTheme {
         HomeScreenContent(
-            sections = listOf()
+            sections = listOf(),
+            onMovieDetailsClick = {}
         )
     }
 }
@@ -91,7 +95,8 @@ private fun HomeScreenSuccessPreview() {
 private fun HomeScreenErrorPreview() {
     TMDBTheme {
         HomeScreenContent(
-            sections = listOf()
+            sections = listOf(),
+            onMovieDetailsClick = {}
         )
     }
 }
