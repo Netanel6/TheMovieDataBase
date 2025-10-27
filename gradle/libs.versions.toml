@@ -18,6 +18,8 @@ hilt = "2.51"
 roomKtx = "2.8.2"
 glide = "4.16.0"
 glide-compose = "1.0.0-beta01"
+navVersion = "2.9.5"
+
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -44,6 +46,7 @@ hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-comp
 glide-core = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 glide-compose = { group = "com.github.bumptech.glide", name = "compose", version.ref = "glide-compose" }
 glide-ksp = { group = "com.github.bumptech.glide", name = "compiler", version.ref = "glide" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navVersion" }
 
 # REQUIRED FOR EACH PROJECT
 androidx-lifecycle-viewmodelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }

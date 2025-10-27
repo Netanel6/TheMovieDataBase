@@ -78,4 +78,6 @@ dependencies {
     implementation(libs.glide.core)
     implementation(libs.glide.compose)
     ksp(libs.glide.ksp)
+
+    implementation(libs.androidx.navigation.compose)
 }
