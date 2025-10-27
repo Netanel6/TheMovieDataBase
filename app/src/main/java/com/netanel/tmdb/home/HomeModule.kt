@@ -1,6 +1,10 @@
 package com.netanel.tmdb.home
 
 import com.netanel.tmdb.domain.movie.MovieApi
+import com.netanel.tmdb.useCase.movie.GetNowPlayingUseCase
+import com.netanel.tmdb.useCase.movie.GetPopularUseCase
+import com.netanel.tmdb.useCase.movie.GetTopRatedUseCase
+import com.netanel.tmdb.useCase.movie.GetUpcomingUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,8 +22,26 @@ object HomeModule {
 
     @Singleton
     @Provides
+    fun provideUpcomingUseCase(movieRepository: MovieRepository) : GetUpcomingUseCase {
+        return GetUpcomingUseCase(movieRepository)
+    }
+
+    @Singleton
+    @Provides
     fun provideNowPlayingUseCase(movieRepository: MovieRepository) : GetNowPlayingUseCase {
         return GetNowPlayingUseCase(movieRepository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideTopRatedUseCase(movieRepository: MovieRepository) : GetTopRatedUseCase {
+        return GetTopRatedUseCase(movieRepository)
+    }
+
+    @Singleton
+    @Provides
+    fun providePopularUseCase(movieRepository: MovieRepository) : GetPopularUseCase {
+        return GetPopularUseCase(movieRepository)
     }
 
     @Singleton
