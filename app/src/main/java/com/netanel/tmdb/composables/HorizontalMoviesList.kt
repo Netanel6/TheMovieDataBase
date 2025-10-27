@@ -20,7 +20,7 @@ fun HorizontalMoviesList(section: MovieSection) {
         is UiState.Success -> {
             Column {
                 Text(
-                    text = section.title,
+                    text = section.title.title,
                     style = MaterialTheme.typography.titleLarge
                 )
                 LazyRow {

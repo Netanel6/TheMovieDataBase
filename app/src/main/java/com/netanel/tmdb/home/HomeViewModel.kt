@@ -115,31 +115,14 @@ sealed class UiState<out T> {
 }
 
 data class MovieSection(
-    val title: String,
+    val title: MovieSectionType,
     val state: UiState<List<Movie>>
-)
-
-/*
-sealed class NowPlayingUiState {
-    data object Loading : NowPlayingUiState()
-    data class Success(val movies: List<Movie>) : NowPlayingUiState()
-    data class Error(val message: String) : NowPlayingUiState()
+) {
+    enum class MovieSectionType(val title: String) {
+        UPCOMING("Upcoming"),
+        NOW_PLAYING("Now Playing"),
+        TOP_RATED("Top Rated"),
+        POPULAR("Popular")
+    }
 }
 
-sealed class UpcomingUiState {
-    data object Loading : UpcomingUiState()
-    data class Success(val movies: List<Movie>) : UpcomingUiState()
-    data class Error(val message: String) : UpcomingUiState()
-}
-
-sealed class TopRatedUiState {
-    data object Loading : TopRatedUiState()
-    data class Success(val movies: List<Movie>) : TopRatedUiState()
-    data class Error(val message: String) : TopRatedUiState()
-}
-
-sealed class PopularUiState {
-    data object Loading : PopularUiState()
-    data class Success(val movies: List<Movie>) : PopularUiState()
-    data class Error(val message: String) : PopularUiState()
-}*/

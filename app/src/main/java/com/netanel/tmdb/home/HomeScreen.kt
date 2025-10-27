@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.netanel.tmdb.composables.HeroSection
 import com.netanel.tmdb.composables.HorizontalMoviesList
 import com.netanel.tmdb.domain.movie.model.Movie
+import com.netanel.tmdb.home.MovieSection.MovieSectionType
 import com.netanel.tmdb.ui.theme.TMDBTheme
 
 /**
@@ -28,10 +29,10 @@ fun HomeScreen(modifier: Modifier = Modifier) {
     val popularState by homeViewModel.popularUiState.collectAsStateWithLifecycle()
 
     val sections = listOf(
-        MovieSection("Upcoming", upcomingState),
-        MovieSection("Now Playing", nowPlayingState),
-        MovieSection("Top Rated", topRatedState),
-        MovieSection("Popular", popularState)
+        MovieSection(MovieSectionType.UPCOMING, upcomingState),
+        MovieSection(MovieSectionType.NOW_PLAYING, nowPlayingState),
+        MovieSection(MovieSectionType.TOP_RATED, topRatedState),
+        MovieSection(MovieSectionType.POPULAR, popularState)
     )
 
     HomeScreenContent(
@@ -46,7 +47,7 @@ private fun HomeScreenContent(
     sections: List<MovieSection>
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        val heroMovie = sections.firstOrNull { it.title == "Top Rated" }
+        val heroMovie = sections.firstOrNull { it.title == MovieSectionType.TOP_RATED }
             ?.state
             ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
 
