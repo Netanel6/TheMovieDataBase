@@ -1,0 +1,120 @@
+package com.netanel.tmdb.features.home
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Devices
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.netanel.tmdb.core.ui.composables.HeroSection
+import com.netanel.tmdb.core.ui.composables.HorizontalMoviesList
+import com.netanel.tmdb.domain.models.Movie
+import com.netanel.tmdb.features.home.MovieSection.MovieSectionType
+import com.netanel.tmdb.core.ui.theme.TMDBTheme
+
+/**
+ * Created by netanelamar on 23/10/2025.
+ * NetanelCA2@gmail.com
+ */
+@Composable
+fun HomeScreen(modifier: Modifier = Modifier, onMovieDetailsClick: (Movie) -> Unit) {
+    val homeViewModel: MoviesViewModel = hiltViewModel()
+    val upcomingState by homeViewModel.upcomingUiState.collectAsStateWithLifecycle()
+    val nowPlayingState by homeViewModel.nowPlayingUiState.collectAsStateWithLifecycle()
+    val topRatedState by homeViewModel.topRatedUiState.collectAsStateWithLifecycle()
+    val popularState by homeViewModel.popularUiState.collectAsStateWithLifecycle()
+
+    val sections = listOf(
+        MovieSection(MovieSectionType.UPCOMING, upcomingState),
+        MovieSection(MovieSectionType.NOW_PLAYING, nowPlayingState),
+        MovieSection(MovieSectionType.TOP_RATED, topRatedState),
+        MovieSection(MovieSectionType.POPULAR, popularState)
+    )
+
+    HomeScreenContent(
+        modifier = modifier,
+        sections = sections,
+        onMovieDetailsClick = onMovieDetailsClick
+    )
+}
+
+@Composable
+private fun HomeScreenContent(
+    modifier: Modifier = Modifier,
+    sections: List<MovieSection>,
+    onMovieDetailsClick: (Movie) -> Unit
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        val heroMovie = sections.firstOrNull { it.title == MovieSectionType.TOP_RATED }
+            ?.state
+            ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
+
+        heroMovie?.let {
+            HeroSection(it) { clickedMovie ->
+                onMovieDetailsClick(clickedMovie)
+            }
+        }
+
+        LazyColumn {
+            items(sections.size) { index ->
+                HorizontalMoviesList(section = sections[index])
+            }
+        }
+    }
+}
+
+
+@Preview(showBackground = true, device = Devices.PIXEL_7)
+@Composable
+private fun HomeScreenLoadingPreview() {
+    TMDBTheme {
+        HomeScreenContent(
+            sections = listOf(),
+            onMovieDetailsClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, device = Devices.PIXEL_7)
+@Composable
+private fun HomeScreenSuccessPreview() {
+    TMDBTheme {
+        HomeScreenContent(
+            sections = listOf(),
+            onMovieDetailsClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HomeScreenErrorPreview() {
+    TMDBTheme {
+        HomeScreenContent(
+            sections = listOf(),
+            onMovieDetailsClick = {}
+        )
+    }
+}
+
+private val previewMovie = Movie(
+    isAdult = false,
+    backdropPath = "/7QirCB1o80NEFpQGlQRZerZbQEp.jpg",
+    genreIds = listOf(10749, 18),
+    id = 1,
+    originalLanguage = "es",
+    originalTitle = "Culpa nuestra",
+    overview = "Jenna and Lion's wedding brings about the long-awaited reunion between Noah and Nick after their breakup.",
+    popularity = 1096.6654,
+    posterPath = "/yzqHt4m1SeY9FbPrfZ0C2Hi9x1s.jpg",
+    releaseDate = "2025-10-15",
+    title = "Our Fault",
+    isVideo = false,
+    voteAverage = 7.854,
+    voteCount = 305
+)
+

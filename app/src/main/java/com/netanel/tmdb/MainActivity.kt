@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.netanel.tmdb.navigation.TmdbNavGraph
-import com.netanel.tmdb.ui.theme.TMDBTheme
+import com.netanel.tmdb.core.navigation.TmdbNavGraph
+import com.netanel.tmdb.core.ui.theme.TMDBTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

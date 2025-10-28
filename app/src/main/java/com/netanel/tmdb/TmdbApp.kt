@@ -9,6 +9,4 @@ import dagger.hilt.android.HiltAndroidApp
  * NetanelCA2@gmail.com
  */
 @HiltAndroidApp
-class TmdbApp: Application() {
-
-}
+class TmdbApp: Application() 
