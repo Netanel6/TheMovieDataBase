@@ -1,7 +1,6 @@
 package com.netanel.tmdb.core.navigation
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -22,7 +21,7 @@ fun TmdbNavGraph(navController: NavHostController, innerPadding: PaddingValues) 
     NavHost(
         navController = navController,
         startDestination = Screen.Home.route,
-        modifier =  Modifier.padding(innerPadding)
+        modifier = Modifier
     ) {
         // Home Screen
         composable(Screen.Home.route) {

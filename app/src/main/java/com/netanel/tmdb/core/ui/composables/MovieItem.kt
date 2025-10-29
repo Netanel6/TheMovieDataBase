@@ -34,7 +34,7 @@ import com.netanel.tmdb.domain.models.Movie
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MovieItem(movie: Movie, onMovieDetailsClicked: (Movie) -> Unit) {
-    Card(Modifier.wrapContentSize().padding(8.dp)) {
+    Card(Modifier.wrapContentSize().padding(4.dp)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             val posterPath = movie.posterPath
             if (posterPath != null) {
@@ -61,7 +61,7 @@ fun MovieItem(movie: Movie, onMovieDetailsClicked: (Movie) -> Unit) {
                 }
             }
 
-            Text(
+           /* Text(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
@@ -69,7 +69,7 @@ fun MovieItem(movie: Movie, onMovieDetailsClicked: (Movie) -> Unit) {
                     .padding(vertical = 8.dp),
                 textAlign = TextAlign.Center,
                 text = "${movie.title} (${movie.originalTitle})"
-            )
+            )*/
         }
     }
 }

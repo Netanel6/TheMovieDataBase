@@ -77,7 +77,7 @@ fun HeroSection(movie: Movie?, onDetailsClick: (movie: Movie) -> Unit) {
             if (highlightedMovie != null) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 4.dp)
                 ) {
                     if (highlightedMovie.isVideo) {
                         Button(onClick = {

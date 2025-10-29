@@ -25,13 +25,6 @@ class MovieRepositoryImpl @Inject constructor(
         return if (response.isSuccessful) response.body() else null
     }
 
-    override suspend fun getMovieDetails(movieId: Int): MovieDetailsResponse? {
-        val response = movieDetailsApi.getMovieDetails(
-            fullUrl = "${Constants.MOVIES_URL}movie/$movieId"
-        )
-        return  if (response.isSuccessful) response.body() else null
-    }
-
     override suspend fun getNowPlayingMovies(): MovieResponse? {
         val response = movieApi.getNowPlayingMovies(
             fullUrl = "${Constants.MOVIES_URL}movie/now_playing"
@@ -52,6 +45,14 @@ class MovieRepositoryImpl @Inject constructor(
         )
         return if (response.isSuccessful) response.body() else null
     }
+
+    override suspend fun getMovieDetails(movieId: Int): MovieDetailsResponse? {
+        val response = movieDetailsApi.getMovieDetails(
+            fullUrl = "${Constants.MOVIES_URL}movie/$movieId"
+        )
+        return  if (response.isSuccessful) response.body() else null
+    }
+
 }
 
 interface MovieRepository {
