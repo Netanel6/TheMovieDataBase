@@ -24,7 +24,9 @@ fun HorizontalMoviesList(section: MovieSection) {
                 )
                 LazyRow {
                     items(state.data, key = { movie -> movie.id }) { movie ->
-                        MovieItem(movie = movie)
+                        MovieItem(
+                            movie = movie,
+                            onMovieDetailsClicked = { section.onMovieClicked(it) })
                     }
                 }
             }

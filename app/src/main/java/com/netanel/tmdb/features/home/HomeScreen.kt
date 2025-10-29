@@ -29,10 +29,10 @@ fun HomeScreen(modifier: Modifier = Modifier, onMovieDetailsClick: (Movie) -> Un
     val popularState by homeViewModel.popularUiState.collectAsStateWithLifecycle()
 
     val sections = listOf(
-        MovieSection(MovieSectionType.UPCOMING, upcomingState),
-        MovieSection(MovieSectionType.NOW_PLAYING, nowPlayingState),
-        MovieSection(MovieSectionType.TOP_RATED, topRatedState),
-        MovieSection(MovieSectionType.POPULAR, popularState)
+        MovieSection(MovieSectionType.UPCOMING, upcomingState, onMovieDetailsClick),
+        MovieSection(MovieSectionType.NOW_PLAYING, nowPlayingState, onMovieDetailsClick),
+        MovieSection(MovieSectionType.TOP_RATED, topRatedState, onMovieDetailsClick),
+        MovieSection(MovieSectionType.POPULAR, popularState, onMovieDetailsClick)
     )
 
     HomeScreenContent(

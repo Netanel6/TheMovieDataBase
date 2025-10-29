@@ -1,6 +1,7 @@
 package com.netanel.tmdb.core.ui.composables
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -32,7 +33,7 @@ import com.netanel.tmdb.domain.models.Movie
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun MovieItem(movie: Movie) {
+fun MovieItem(movie: Movie, onMovieDetailsClicked: (Movie) -> Unit) {
     Card(Modifier.wrapContentSize().padding(8.dp)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             val posterPath = movie.posterPath
@@ -40,7 +41,7 @@ fun MovieItem(movie: Movie) {
                 GlideImage(
                     model = Constants.IMAGES_URL + posterPath,
                     contentDescription = movie.title,
-                    modifier = Modifier.size(width = 120.dp, height = 180.dp),
+                    modifier = Modifier.size(width = 120.dp, height = 180.dp).clickable { onMovieDetailsClicked(movie) },
                     alignment = Alignment.Center,
                     contentScale = ContentScale.Crop
                 )
@@ -93,6 +94,6 @@ fun MovieItemPreview() {
             isVideo = false,
             voteAverage = 7.854,
             voteCount = 305
-        )
+        ), {}
     )
 }
