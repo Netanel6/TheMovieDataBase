@@ -1,20 +1,24 @@
 package com.netanel.tmdb.features.home
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.netanel.tmdb.core.ui.composables.HeroSection
 import com.netanel.tmdb.core.ui.composables.HorizontalMoviesList
+import com.netanel.tmdb.core.ui.theme.TMDBTheme
 import com.netanel.tmdb.domain.models.Movie
 import com.netanel.tmdb.features.home.MovieSection.MovieSectionType
-import com.netanel.tmdb.core.ui.theme.TMDBTheme
 
 /**
  * Created by netanelamar on 23/10/2025.
@@ -48,7 +52,16 @@ private fun HomeScreenContent(
     sections: List<MovieSection>,
     onMovieDetailsClick: (Movie) -> Unit
 ) {
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(Color.Transparent, Color.Black),
+                    startY = 150f
+                )
+            )
+    ) {
         val heroMovie = sections.firstOrNull { it.title == MovieSectionType.TOP_RATED }
             ?.state
             ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
