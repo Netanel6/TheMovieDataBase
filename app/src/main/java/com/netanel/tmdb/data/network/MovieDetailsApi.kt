@@ -8,7 +8,7 @@ import retrofit2.http.Query
 import retrofit2.http.Url
 
 interface MovieDetailsApi {
-    @GET("movie/{movie_id}")
+    @GET
     suspend fun getMovieDetails(
         @Url fullUrl: String,
         @Query("language") language: String = "en-US"

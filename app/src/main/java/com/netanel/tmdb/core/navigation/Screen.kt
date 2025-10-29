@@ -36,7 +36,7 @@ fun TmdbNavGraph(navController: NavHostController, innerPadding: PaddingValues) 
 
         // Details Screen
         composable(Screen.Details.route) { backStackEntry ->
-            val movieId = backStackEntry.arguments?.getString("movieId")?.toIntOrNull()
+            val movieId = backStackEntry.arguments?.getString("movieId")!!.toInt()
             MovieDetailsScreen(movieId)
         }
     }
