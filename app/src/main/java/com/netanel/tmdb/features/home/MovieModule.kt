@@ -2,6 +2,8 @@ package com.netanel.tmdb.features.home
 
 import com.netanel.tmdb.data.network.MovieApi
 import com.netanel.tmdb.data.network.MovieDetailsApi
+import com.netanel.tmdb.domain.repository.MovieRepository
+import com.netanel.tmdb.domain.repository.MovieRepositoryImpl
 import com.netanel.tmdb.domain.useCase.movie.GetNowPlayingUseCase
 import com.netanel.tmdb.domain.useCase.movie.GetPopularUseCase
 import com.netanel.tmdb.domain.useCase.movie.GetTopRatedUseCase
