@@ -1,7 +1,7 @@
 package com.netanel.tmdb.domain.useCase.movieDetails
 
 import com.netanel.tmdb.domain.models.MovieDetailsResponse
-import com.netanel.tmdb.features.home.MovieRepository
+import com.netanel.tmdb.domain.repository.MovieRepository
 import javax.inject.Inject
 
 
