@@ -29,7 +29,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.netanel.tmdb.domain.Constants
 import com.netanel.tmdb.domain.models.MovieDetailsResponse
-import com.netanel.tmdb.features.home.UiState
+import com.netanel.tmdb.domain.models.UiState
 
 @Composable
 fun MovieDetailsScreen(movieId: Int) {

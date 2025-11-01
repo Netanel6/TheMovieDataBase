@@ -27,8 +27,12 @@ fun TmdbNavGraph(navController: NavHostController, innerPadding: PaddingValues) 
         composable(Screen.Home.route) {
             HomeScreen(
                 modifier = Modifier,
-                onMovieDetailsClick = { movie ->
+                onMovieDetailsClicked = { movie ->
                     navController.navigate(Screen.Details.createRoute(movie.id))
+                },
+                onViewAllClicked = {
+                    // TODO: Implement type of movie list screen
+//                    navController.navigate()
                 }
             )
         }
@@ -38,5 +42,13 @@ fun TmdbNavGraph(navController: NavHostController, innerPadding: PaddingValues) 
             val movieId = backStackEntry.arguments?.getString("movieId")!!.toInt()
             MovieDetailsScreen(movieId)
         }
+
+        // All Movies Screen
+        composable(Screen.Details.route) { backStackEntry ->
+            // TODO: Move type of movie to this screen and lazy loading the list of all movies
+//            val movieId = backStackEntry.arguments?.getString("movieId")!!.toInt()
+//            MovieDetailsScreen(movieId)
+        }
+
     }
 }
