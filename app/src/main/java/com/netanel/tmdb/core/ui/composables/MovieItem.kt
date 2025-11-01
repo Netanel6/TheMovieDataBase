@@ -1,6 +1,8 @@
 package com.netanel.tmdb.core.ui.composables
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,12 +10,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,7 +39,16 @@ import com.netanel.tmdb.domain.models.Movie
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
 fun MovieItem(movie: Movie, onMovieDetailsClicked: (Movie) -> Unit) {
-    Card(Modifier.wrapContentSize().padding(4.dp)) {
+    Card(
+        modifier = Modifier
+            .wrapContentSize()
+            .padding(4.dp)
+            // FIX: מעביר את ה-shape ישירות ל-border
+            .border(
+                border = BorderStroke(0.3.dp, Color.White),
+                shape = RoundedCornerShape(12.dp)
+            )
+    ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             val posterPath = movie.posterPath
             if (posterPath != null) {

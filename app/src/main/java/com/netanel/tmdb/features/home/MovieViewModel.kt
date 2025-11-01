@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.netanel.tmdb.domain.models.Movie
 import com.netanel.tmdb.domain.models.MovieDetailsResponse
+import com.netanel.tmdb.domain.models.UiState
 import com.netanel.tmdb.domain.useCase.movie.GetNowPlayingUseCase
 import com.netanel.tmdb.domain.useCase.movie.GetPopularUseCase
 import com.netanel.tmdb.domain.useCase.movie.GetTopRatedUseCase
@@ -128,22 +129,4 @@ class MoviesViewModel @Inject constructor(
 
 /* Data Classes */
 
-sealed class UiState<out T> {
-    data object Loading : UiState<Nothing>()
-    data class Success<T>(val data: T) : UiState<T>()
-    data class Error(val message: String) : UiState<Nothing>()
-}
-
-data class MovieSection(
-    val title: MovieSectionType,
-    val state: UiState<List<Movie>>,
-    val onMovieClicked: (Movie) -> Unit
-) {
-    enum class MovieSectionType(val title: String) {
-        UPCOMING("Upcoming"),
-        NOW_PLAYING("Now Playing"),
-        TOP_RATED("Top Rated"),
-        POPULAR("Popular")
-    }
-}
 

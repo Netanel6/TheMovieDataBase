@@ -3,8 +3,8 @@ package com.netanel.tmdb.features.movieDetails
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.netanel.tmdb.domain.models.MovieDetailsResponse
+import com.netanel.tmdb.domain.models.UiState
 import com.netanel.tmdb.domain.useCase.movieDetails.GetMovieDetailsUseCase
-import com.netanel.tmdb.features.home.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
