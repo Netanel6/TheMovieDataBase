@@ -23,7 +23,7 @@ import javax.inject.Inject
  */
 
 @HiltViewModel
-class MoviesViewModel @Inject constructor(
+class HomeViewModel @Inject constructor(
     private val getUpcomingUseCase: GetUpcomingUseCase,
     private val getNowPlayingUseCase: GetNowPlayingUseCase,
     private val getPopularUseCase: GetPopularUseCase,
@@ -46,7 +46,6 @@ class MoviesViewModel @Inject constructor(
     private val _popularUiState: MutableStateFlow<UiState<List<Movie>>> =
         MutableStateFlow(UiState.Loading)
     val popularUiState: StateFlow<UiState<List<Movie>>> = _popularUiState.asStateFlow()
-
 
     private val _movieDetails: MutableStateFlow<UiState<MovieDetailsResponse>> =
         MutableStateFlow(UiState.Loading)
@@ -112,7 +111,7 @@ class MoviesViewModel @Inject constructor(
         }
     }
 
-    private fun loadMovieDetails() {
+    /*private fun loadMovieDetails() {
         viewModelScope.launch {
             try {
                 val movies = getUpcomingUseCase.invoke()
@@ -123,10 +122,9 @@ class MoviesViewModel @Inject constructor(
                 _upcomingUiState.value = UiState.Error(e.message ?: "Unexpected error")
             }
         }
-    }
+    }*/
+
 
 }
-
-/* Data Classes */
 
 

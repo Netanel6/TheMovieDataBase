@@ -1,4 +1,4 @@
-package com.netanel.tmdb.features.home
+package com.netanel.tmdb.domain.repository
 
 import com.netanel.tmdb.domain.Constants
 import com.netanel.tmdb.data.network.MovieApi

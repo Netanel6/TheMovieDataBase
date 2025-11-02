@@ -28,7 +28,7 @@ import com.netanel.tmdb.domain.models.UiState
  */
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, onMovieDetailsClicked: (Movie) -> Unit, onViewAllClicked: (MovieSectionType) -> Unit) {
-    val homeViewModel: MoviesViewModel = hiltViewModel()
+    val homeViewModel: HomeViewModel = hiltViewModel()
     val upcomingState by homeViewModel.upcomingUiState.collectAsStateWithLifecycle()
     val nowPlayingState by homeViewModel.nowPlayingUiState.collectAsStateWithLifecycle()
     val topRatedState by homeViewModel.topRatedUiState.collectAsStateWithLifecycle()
