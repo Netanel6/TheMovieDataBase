@@ -3,7 +3,6 @@ package com.netanel.tmdb.features.allMovies
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.netanel.tmdb.domain.models.Movie
-import com.netanel.tmdb.domain.models.MovieResponse
 import com.netanel.tmdb.domain.models.MovieSection
 import com.netanel.tmdb.domain.models.UiState
 import com.netanel.tmdb.domain.useCase.movie.GetNowPlayingUseCase
@@ -17,32 +16,38 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 /**
  * Created by netanelamar on 02/11/2025.
  * NetanelCA2@gmail.com
  */
 @HiltViewModel
-class AllMoviesViewModel @Inject constructor(private val getUpcomingUseCase: GetUpcomingUseCase,
-                                             private val getNowPlayingUseCase: GetNowPlayingUseCase,
-                                             private val getPopularUseCase: GetPopularUseCase,
-                                             private val getTopRatedUseCase: GetTopRatedUseCase
-): ViewModel() {
+class AllMoviesViewModel @Inject constructor(
+    private val getUpcomingUseCase: GetUpcomingUseCase,
+    private val getNowPlayingUseCase: GetNowPlayingUseCase,
+    private val getPopularUseCase: GetPopularUseCase,
+    private val getTopRatedUseCase: GetTopRatedUseCase,
+) : ViewModel() {
 
-    private val _moviesUiState: MutableStateFlow<UiState<MovieResponse>> =
+    private val _moviesUiState: MutableStateFlow<UiState<List<Movie>>> =
         MutableStateFlow(UiState.Loading)
-    val moviesUiState: StateFlow<UiState<MovieResponse>> = _moviesUiState.asStateFlow()
-
+    val moviesUiState: StateFlow<UiState<List<Movie>>> = _moviesUiState.asStateFlow()
 
     fun handleMoviesUiState(movieSection: MovieSection.MovieSectionType) {
-     viewModelScope.launch {
-         when(movieSection) {
-             MovieSection.MovieSectionType.UPCOMING -> _moviesUiState.value = UiState.Success(getUpcomingUseCase.invoke()!!)
-             MovieSection.MovieSectionType.NOW_PLAYING -> _moviesUiState.value = UiState.Success(getNowPlayingUseCase.invoke()!!)
-             MovieSection.MovieSectionType.TOP_RATED -> _moviesUiState.value = UiState.Success(getTopRatedUseCase.invoke()!!)
-             MovieSection.MovieSectionType.POPULAR -> _moviesUiState.value = UiState.Success(getPopularUseCase.invoke()!!)
-             MovieSection.MovieSectionType.DEFAULT -> { }
-         }
-     }
+        _moviesUiState.value = UiState.Loading
+        viewModelScope.launch {
+            _moviesUiState.value = try {
+                val movies = when (movieSection) {
+                    MovieSection.MovieSectionType.UPCOMING -> getUpcomingUseCase.invoke()?.results.orEmpty()
+                    MovieSection.MovieSectionType.NOW_PLAYING -> getNowPlayingUseCase.invoke()?.results.orEmpty()
+                    MovieSection.MovieSectionType.TOP_RATED -> getTopRatedUseCase.invoke()?.results.orEmpty()
+                    MovieSection.MovieSectionType.POPULAR -> getPopularUseCase.invoke()?.results.orEmpty()
+                    MovieSection.MovieSectionType.DEFAULT -> emptyList()
+                }
+
+                UiState.Success(movies)
+            } catch (error: Exception) {
+                UiState.Error(error.message ?: "Unexpected error")
+            }
+        }
     }
 }

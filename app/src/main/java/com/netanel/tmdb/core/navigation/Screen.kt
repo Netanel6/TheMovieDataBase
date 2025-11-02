@@ -72,7 +72,13 @@ fun TmdbNavGraph(navController: NavHostController, innerPadding: PaddingValues) 
             ) as MovieSectionType?
 
             if (sectionType != null) {
-                AllMoviesScreen(sectionType = sectionType)
+                AllMoviesScreen(
+                    sectionType = sectionType,
+                    onMovieDetailsClicked = { movie ->
+                        navController.navigate(Screen.Details.createRoute(movie.id))
+                    },
+                    onNavigateBack = { navController.popBackStack() }
+                )
             } else {
                 navController.popBackStack()
             }
