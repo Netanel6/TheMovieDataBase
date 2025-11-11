@@ -1,11 +1,13 @@
 package com.netanel.tmdb.features.movieDetails
 
+import android.widget.Space
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -23,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -68,7 +71,7 @@ fun MovieDetailsContent(data: MovieDetailsResponse) {
         GlideImage(
             model = Constants.IMAGES_URL + data.backdropPath,
             contentDescription = data.title,
-            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)),
+            modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Inside
         )
     }
@@ -82,7 +85,7 @@ fun MovieDetailsContent(data: MovieDetailsResponse) {
                 )
             )
     ) {
-        Row(
+        /*Row(
             modifier = Modifier
                 .padding(16.dp)
         ) {
@@ -92,28 +95,39 @@ fun MovieDetailsContent(data: MovieDetailsResponse) {
                 modifier = Modifier
                     .width(120.dp)
                     .height(180.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(12.dp))
             )
             Spacer(modifier = Modifier.width(12.dp))
-            Column(
-            ) {
-                Text(
-                    text = data.title,
-                    style = MaterialTheme.typography.titleLarge.copy(color = Color.White)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
 
-                Text(
-                    text = data.tagline ?: "",
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.LightGray)
-                )
+        }*/
 
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = data.overview,
-                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.LightGray)
-                )
+        Column(
+        ) {
+            Text(
+                text = data.title,
+                style = MaterialTheme.typography.titleLarge.copy(color = Color.White)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row {
+                for(genre in data.genres) {
+                    Text(
+                        fontSize = 12.sp,
+                        text = genre.name,
+                    )
+                    Spacer(Modifier.width(4.dp))
+                }
             }
+            Text(
+                text = data.tagline ?: "",
+                style = MaterialTheme.typography.bodyMedium.copy(color = Color.LightGray)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = data.overview,
+                style = MaterialTheme.typography.bodyMedium.copy(color = Color.LightGray)
+            )
         }
     }
 }
