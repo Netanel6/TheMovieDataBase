@@ -3,6 +3,7 @@ package com.netanel.tmdb.data.di
 import com.netanel.tmdb.domain.Constants
 import com.netanel.tmdb.data.network.MovieApi
 import com.netanel.tmdb.data.network.MovieDetailsApi
+import com.netanel.tmdb.data.network.SearchApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -73,6 +74,13 @@ object NetworkModule {
     @Singleton
     fun provideMovieDetailsApi(retrofit: Retrofit): MovieDetailsApi {
         return retrofit.create(MovieDetailsApi::class.java)
+    }
+
+    // 🔹 Search API
+    @Provides
+    @Singleton
+    fun provideSearchApi(retrofit: Retrofit): SearchApi {
+        return retrofit.create(SearchApi::class.java)
     }
 }
 

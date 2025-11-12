@@ -49,7 +49,7 @@ object MovieModule {
 
     @Singleton
     @Provides
-    fun provideHomeRepository(movieApi: MovieApi, movieDetailsApi: MovieDetailsApi) : MovieRepository {
+    fun provideMovieRepository(movieApi: MovieApi, movieDetailsApi: MovieDetailsApi) : MovieRepository {
         return MovieRepositoryImpl(movieApi, movieDetailsApi)
     }
 }
