@@ -13,21 +13,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.stickyHeader
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netanel.tmdb.core.ui.composables.HeroSection
@@ -127,13 +127,13 @@ private fun HomeScreenContent(
         }
     }
 
-    val heroHeightDp = remember(heroHeightPx) {
-        with(density) { heroHeightPx.toDp() }
+    val heroHeightDp = remember(density, heroHeightPx) {
+        with(density) { heroHeightPx.toDp() }.coerceIn(0.dp, heroMaxHeight)
     }
 
     val animatedHeroHeightDp by animateDpAsState(
         targetValue = heroHeightDp,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessLow),
         label = "heroHeight"
     )
 
@@ -143,9 +143,11 @@ private fun HomeScreenContent(
 
     val searchBarTopPadding by animateDpAsState(
         targetValue = if (isHeroVisible) 8.dp else 0.dp,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessLow),
         label = "searchBarPadding"
     )
+
+    val clampedSearchBarTopPadding = searchBarTopPadding.coerceAtLeast(0.dp)
 
     Box(
         modifier = modifier
@@ -189,7 +191,7 @@ private fun HomeScreenContent(
                         movies = moviesResults,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = searchBarTopPadding)
+                            .padding(top = clampedSearchBarTopPadding)
                     )
                 }
             }
