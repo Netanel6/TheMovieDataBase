@@ -1,5 +1,6 @@
 package com.netanel.tmdb.domain.repository
 
+import android.net.Uri
 import com.netanel.tmdb.data.network.SearchApi
 import com.netanel.tmdb.domain.Constants
 import com.netanel.tmdb.domain.models.MovieResponse
@@ -15,8 +16,9 @@ class SearchRepositoryImpl @Inject constructor(
     private val searchApi: SearchApi
 ) : SearchRepository {
     override suspend fun searchMovieByQuery(query: String): MovieResponse? {
+        val encodedQuery = Uri.encode(query)
         val response = searchApi.searchMovieByQuery(
-            fullUrl = "${Constants.MOVIES_URL}/search/movie?query=$query"
+            fullUrl = "${Constants.MOVIES_URL}search/movie?query=$encodedQuery"
         )
         return if (response.isSuccessful) response.body() else null
     }

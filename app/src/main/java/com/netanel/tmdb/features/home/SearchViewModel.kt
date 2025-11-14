@@ -30,12 +30,23 @@ class SearchViewModel @Inject constructor(val searchUseCase: SearchUseCase) : Vi
 
     fun onQueryChanged(newQuery: String) {
         searchQuery.value = newQuery
+        if (newQuery.isBlank()) {
+            _searchUiState.value = UiState.Success(emptyList())
+        }
     }
 
     fun searchMovies() {
         viewModelScope.launch {
+            val currentQuery = searchQuery.value.trim()
+            if (currentQuery.isEmpty()) {
+                _searchUiState.value = UiState.Success(emptyList())
+                return@launch
+            }
+
+            _searchUiState.value = UiState.Loading
+
             try {
-                val response = searchUseCase.invoke(query = searchQuery.value)
+                val response = searchUseCase.invoke(query = currentQuery)
                 _searchUiState.value = UiState.Success(
                     data = response?.results ?: emptyList()
                 )
