@@ -1,5 +1,8 @@
 package com.netanel.tmdb.features.home
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -112,23 +115,37 @@ private fun HomeScreenContent(
 
     val heroHeightPx by remember {
         derivedStateOf {
-            val scrollOffset = when (listState.firstVisibleItemIndex) {
-                0 -> listState.firstVisibleItemScrollOffset.toFloat()
+            val heroItem = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == "hero" }
+            when {
+                heroItem != null -> {
+                    val offset = heroItem.offset.coerceAtLeast(0).toFloat()
+                    (heroMaxHeightPx - offset).coerceIn(0f, heroMaxHeightPx)
+                }
+                listState.firstVisibleItemIndex > 0 -> 0f
                 else -> heroMaxHeightPx
             }
-            (heroMaxHeightPx - scrollOffset).coerceIn(0f, heroMaxHeightPx)
         }
     }
 
-    val heroHeightDp by remember {
-        derivedStateOf {
-            with(density) { heroHeightPx.toDp() }
-        }
+    val heroHeightDp = remember(heroHeightPx) {
+        with(density) { heroHeightPx.toDp() }
     }
+
+    val animatedHeroHeightDp by animateDpAsState(
+        targetValue = heroHeightDp,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        label = "heroHeight"
+    )
 
     val isHeroVisible by remember {
         derivedStateOf { heroHeightPx > 0f }
     }
+
+    val searchBarTopPadding by animateDpAsState(
+        targetValue = if (isHeroVisible) 8.dp else 0.dp,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        label = "searchBarPadding"
+    )
 
     Box(
         modifier = modifier
@@ -149,7 +166,7 @@ private fun HomeScreenContent(
                     HeroSection(
                         movie = heroMovie,
                         onDetailsClick = onMovieDetailsClicked,
-                        modifier = Modifier.height(heroHeightDp)
+                        modifier = Modifier.height(animatedHeroHeightDp)
                     )
                 } else {
                     Spacer(modifier = Modifier.height(0.dp))
@@ -172,7 +189,7 @@ private fun HomeScreenContent(
                         movies = moviesResults,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = if (isHeroVisible) 8.dp else 0.dp)
+                            .padding(top = searchBarTopPadding)
                     )
                 }
             }
