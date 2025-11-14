@@ -1,15 +1,28 @@
 package com.netanel.tmdb.features.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.stickyHeader
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -88,7 +101,36 @@ private fun HomeScreenContent(
     moviesResults: List<Movie> = emptyList()
 ) {
 
-    Column(
+    val listState = rememberLazyListState()
+    val heroMovie = sections.firstOrNull { it.movieSectionType == MovieSectionType.TOP_RATED }
+        ?.state
+        ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
+
+    val heroMaxHeight = 400.dp
+    val density = LocalDensity.current
+    val heroMaxHeightPx = with(density) { heroMaxHeight.toPx() }
+
+    val heroHeightPx by remember {
+        derivedStateOf {
+            val scrollOffset = when (listState.firstVisibleItemIndex) {
+                0 -> listState.firstVisibleItemScrollOffset.toFloat()
+                else -> heroMaxHeightPx
+            }
+            (heroMaxHeightPx - scrollOffset).coerceIn(0f, heroMaxHeightPx)
+        }
+    }
+
+    val heroHeightDp by remember {
+        derivedStateOf {
+            with(density) { heroHeightPx.toDp() }
+        }
+    }
+
+    val isHeroVisible by remember {
+        derivedStateOf { heroHeightPx > 0f }
+    }
+
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(
@@ -98,29 +140,48 @@ private fun HomeScreenContent(
                 )
             )
     ) {
-        val heroMovie = sections.firstOrNull { it.movieSectionType == MovieSectionType.TOP_RATED }
-            ?.state
-            ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
-
-        heroMovie?.let {
-            HeroSection(it) { clickedMovie ->
-                onMovieDetailsClicked(clickedMovie)
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            item("hero") {
+                if (heroMovie != null) {
+                    HeroSection(
+                        movie = heroMovie,
+                        onDetailsClick = onMovieDetailsClicked,
+                        modifier = Modifier.height(heroHeightDp)
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(0.dp))
+                }
             }
-        }
 
+            stickyHeader("search_bar") {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .zIndex(1f),
+                    color = MaterialTheme.colorScheme.background,
+                    shadowElevation = 4.dp
+                ) {
+                    MovieSearchBar(
+                        query = query,
+                        onQueryChange = onQueryChange,
+                        onSearchClicked = onSearchClicked,
+                        onMovieClicked = onMovieDetailsClicked,
+                        movies = moviesResults,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = if (isHeroVisible) 8.dp else 0.dp)
+                    )
+                }
+            }
 
-        MovieSearchBar(
-            query = query,
-            onQueryChange = onQueryChange,
-            onSearchClicked = onSearchClicked,
-            onMovieClicked = onMovieDetailsClicked,
-            movies = moviesResults
-        )
-
-
-        LazyColumn {
-            items(sections.size) { index ->
-                HorizontalMoviesList(section = sections[index], onViewAllClicked = onViewAllClicked)
+            items(
+                items = sections,
+                key = { it.movieSectionType }
+            ) { section ->
+                HorizontalMoviesList(section = section, onViewAllClicked = onViewAllClicked)
             }
         }
     }
