@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -15,6 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netanel.tmdb.core.ui.composables.HeroSection
 import com.netanel.tmdb.core.ui.composables.HorizontalMoviesList
+import com.netanel.tmdb.core.ui.composables.MovieSearchBar
 import com.netanel.tmdb.core.ui.theme.TMDBTheme
 import com.netanel.tmdb.domain.models.Movie
 import com.netanel.tmdb.domain.models.MovieSection
@@ -27,13 +29,26 @@ import com.netanel.tmdb.domain.models.UiState
  * NetanelCA2@gmail.com
  */
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, onMovieDetailsClicked: (Movie) -> Unit, onViewAllClicked: (MovieSectionType) -> Unit) {
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    onMovieDetailsClicked: (Movie) -> Unit,
+    onViewAllClicked: (MovieSectionType) -> Unit
+) {
     val homeViewModel: HomeViewModel = hiltViewModel()
+    val searchViewModel: SearchViewModel = hiltViewModel()
+
     val upcomingState by homeViewModel.upcomingUiState.collectAsStateWithLifecycle()
     val nowPlayingState by homeViewModel.nowPlayingUiState.collectAsStateWithLifecycle()
     val topRatedState by homeViewModel.topRatedUiState.collectAsStateWithLifecycle()
     val popularState by homeViewModel.popularUiState.collectAsStateWithLifecycle()
 
+    val query = searchViewModel.query.collectAsStateWithLifecycle().value
+
+    val searchResultsState = searchViewModel.searchUiState.collectAsStateWithLifecycle().value
+    val searchResults = when (searchResultsState) {
+        is UiState.Success -> searchResultsState.data
+        else -> emptyList()
+    }
     val sections = listOf(
         MovieSection(MovieSectionType.UPCOMING, upcomingState, onMovieDetailsClicked),
         MovieSection(MovieSectionType.NOW_PLAYING, nowPlayingState, onMovieDetailsClicked),
@@ -41,11 +56,23 @@ fun HomeScreen(modifier: Modifier = Modifier, onMovieDetailsClicked: (Movie) -> 
         MovieSection(MovieSectionType.POPULAR, popularState, onMovieDetailsClicked)
     )
 
+    LaunchedEffect(query) {
+        if (query.isNotBlank()) {
+            kotlinx.coroutines.delay(500)
+            searchViewModel.searchMovies()
+        }
+    }
+
+
     HomeScreenContent(
         modifier = modifier,
         sections = sections,
         onMovieDetailsClicked = onMovieDetailsClicked,
         onViewAllClicked = onViewAllClicked,
+        query = query,
+        onQueryChange = { searchViewModel.onQueryChanged(it) },
+        onSearchClicked = { searchViewModel.searchMovies() },
+        moviesResults = searchResults
     )
 }
 
@@ -54,8 +81,13 @@ private fun HomeScreenContent(
     modifier: Modifier = Modifier,
     sections: List<MovieSection>,
     onMovieDetailsClicked: (Movie) -> Unit = { },
-    onViewAllClicked: (MovieSectionType) -> Unit = { }
+    onViewAllClicked: (MovieSectionType) -> Unit = { },
+    query: String = "",
+    onQueryChange: (String) -> Unit = { },
+    onSearchClicked: () -> Unit = { },
+    moviesResults: List<Movie> = emptyList()
 ) {
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -75,6 +107,16 @@ private fun HomeScreenContent(
                 onMovieDetailsClicked(clickedMovie)
             }
         }
+
+
+        MovieSearchBar(
+            query = query,
+            onQueryChange = onQueryChange,
+            onSearchClicked = onSearchClicked,
+            onMovieClicked = onMovieDetailsClicked,
+            movies = moviesResults
+        )
+
 
         LazyColumn {
             items(sections.size) { index ->
@@ -101,7 +143,6 @@ private fun HomeScreenSuccessPreview() {
     TMDBTheme {
         HomeScreenContent(
             sections = listOf(),
-
         )
     }
 }
