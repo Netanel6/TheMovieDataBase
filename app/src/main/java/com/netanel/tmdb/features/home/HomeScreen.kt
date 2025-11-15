@@ -7,12 +7,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.lazy.stickyHeader
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -38,6 +38,7 @@ import com.netanel.tmdb.domain.models.Movie
 import com.netanel.tmdb.domain.models.MovieSection
 import com.netanel.tmdb.domain.models.MovieSection.MovieSectionType
 import com.netanel.tmdb.domain.models.UiState
+import kotlinx.coroutines.delay
 
 
 /**
@@ -74,7 +75,7 @@ fun HomeScreen(
 
     LaunchedEffect(query) {
         if (query.isNotBlank()) {
-            kotlinx.coroutines.delay(500)
+            delay(500)
             searchViewModel.searchMovies()
         }
     }
