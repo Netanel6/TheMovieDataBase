@@ -142,7 +142,7 @@ private fun HomeScreenContent(
     }
 
     val searchBarTopPadding by animateDpAsState(
-        targetValue = if (isHeroVisible) 8.dp else 0.dp,
+        targetValue = if (isHeroVisible) 0.dp else 8.dp,
         animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessLow),
         label = "searchBarPadding"
     )
