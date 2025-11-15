@@ -29,13 +29,16 @@ import com.netanel.tmdb.domain.models.Movie
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun HeroSection(movie: Movie?, onDetailsClick: (movie: Movie) -> Unit) {
+fun HeroSection(
+    movie: Movie?,
+    onDetailsClick: (movie: Movie) -> Unit,
+    modifier: Modifier = Modifier.height(400.dp)
+) {
     val context = LocalContext.current
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .height(400.dp)
     ) {
         val highlightedMovie = movie
         val backdrop = highlightedMovie?.backdropPath
