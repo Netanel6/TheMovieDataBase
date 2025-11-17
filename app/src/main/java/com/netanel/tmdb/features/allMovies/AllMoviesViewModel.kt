@@ -9,6 +9,7 @@ import com.netanel.tmdb.domain.useCase.movie.GetNowPlayingUseCase
 import com.netanel.tmdb.domain.useCase.movie.GetPopularUseCase
 import com.netanel.tmdb.domain.useCase.movie.GetTopRatedUseCase
 import com.netanel.tmdb.domain.useCase.movie.GetUpcomingUseCase
+import com.netanel.tmdb.domain.useCase.search.SearchUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,25 +27,33 @@ class AllMoviesViewModel @Inject constructor(
     private val getNowPlayingUseCase: GetNowPlayingUseCase,
     private val getPopularUseCase: GetPopularUseCase,
     private val getTopRatedUseCase: GetTopRatedUseCase,
+    private val searchUseCase: SearchUseCase,
 ) : ViewModel() {
 
     private val _moviesUiState: MutableStateFlow<UiState<List<Movie>>> =
         MutableStateFlow(UiState.Loading)
     val moviesUiState: StateFlow<UiState<List<Movie>>> = _moviesUiState.asStateFlow()
 
-    fun handleMoviesUiState(movieSection: MovieSection.MovieSectionType) {
+    fun handleMoviesUiState(movieSection: MovieSection.MovieSectionType?, query: String?) {
         _moviesUiState.value = UiState.Loading
         viewModelScope.launch {
             _moviesUiState.value = try {
-                val movies = when (movieSection) {
-                    MovieSection.MovieSectionType.UPCOMING -> getUpcomingUseCase.invoke()?.results.orEmpty()
-                    MovieSection.MovieSectionType.NOW_PLAYING -> getNowPlayingUseCase.invoke()?.results.orEmpty()
-                    MovieSection.MovieSectionType.TOP_RATED -> getTopRatedUseCase.invoke()?.results.orEmpty()
-                    MovieSection.MovieSectionType.POPULAR -> getPopularUseCase.invoke()?.results.orEmpty()
-                    MovieSection.MovieSectionType.DEFAULT -> emptyList()
+                if (movieSection != null) {
+                    val movies = when (movieSection) {
+                        MovieSection.MovieSectionType.UPCOMING -> getUpcomingUseCase.invoke()?.results.orEmpty()
+                        MovieSection.MovieSectionType.NOW_PLAYING -> getNowPlayingUseCase.invoke()?.results.orEmpty()
+                        MovieSection.MovieSectionType.TOP_RATED -> getTopRatedUseCase.invoke()?.results.orEmpty()
+                        MovieSection.MovieSectionType.POPULAR -> getPopularUseCase.invoke()?.results.orEmpty()
+                        MovieSection.MovieSectionType.DEFAULT -> emptyList()
+                        null -> emptyList()
+                    }
+                    UiState.Success(movies)
+                } else {
+                    val movies = searchUseCase.invoke(query!!)?.results.orEmpty()
+                    UiState.Success(movies)
                 }
 
-                UiState.Success(movies)
+
             } catch (error: Exception) {
                 UiState.Error(error.message ?: "Unexpected error")
             }

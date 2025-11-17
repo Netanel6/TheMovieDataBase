@@ -22,13 +22,19 @@ import com.netanel.tmdb.domain.models.UiState
 
 
 @Composable
-fun HorizontalMoviesList(section: MovieSection, onViewAllClicked: (MovieSectionType) -> Unit) {
+fun HorizontalMoviesList(section: MovieSection, onViewAllClicked: (MovieSectionType?, String?) -> Unit) {
     when (val state = section.state) {
         is UiState.Loading -> CircularProgressIndicator()
         is UiState.Error -> Text(text = state.message)
         is UiState.Success -> {
             Column(modifier = Modifier) {
-                Row(modifier = Modifier.fillMaxHeight().fillMaxWidth().padding(bottom = 8.dp, top = 16.dp, start = 16.dp, end = 16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp, top = 16.dp, start = 16.dp, end = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     Text(
                         modifier = Modifier,
                         text = section.movieSectionType.title,
@@ -36,7 +42,7 @@ fun HorizontalMoviesList(section: MovieSection, onViewAllClicked: (MovieSectionT
                     )
                     Text(
                         modifier = Modifier.clickable {
-                            onViewAllClicked(section.movieSectionType)
+                            onViewAllClicked(section.movieSectionType, null)
                         },
                         text = "View All",
                         style = MaterialTheme.typography.bodySmall

@@ -39,20 +39,29 @@ import com.netanel.tmdb.domain.models.UiState
 @Composable
 fun AllMoviesScreen(
     modifier: Modifier = Modifier,
-    sectionType: MovieSectionType = MovieSectionType.DEFAULT,
+    sectionType: MovieSectionType? = null,
+    query: String? = null,
     onMovieDetailsClicked: (Movie) -> Unit = {},
     onNavigateBack: () -> Unit = {},
 ) {
     val allMoviesViewModel: AllMoviesViewModel = hiltViewModel()
     val movieListState by allMoviesViewModel.moviesUiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(sectionType) {
-        allMoviesViewModel.handleMoviesUiState(sectionType)
+    sectionType?.let { type ->
+        LaunchedEffect(type) {
+            allMoviesViewModel.handleMoviesUiState(type, null)
+        }
+    }
+
+    query?.let { title ->
+        LaunchedEffect(title) {
+            allMoviesViewModel.handleMoviesUiState(null, title)
+        }
     }
 
     AllMoviesScreenContent(
         modifier = modifier,
-        title = sectionType.title,
+        title = sectionType?.title ?: query.toString(),
         state = movieListState,
         onMovieDetailsClicked = onMovieDetailsClicked,
         onNavigateBack = onNavigateBack,
