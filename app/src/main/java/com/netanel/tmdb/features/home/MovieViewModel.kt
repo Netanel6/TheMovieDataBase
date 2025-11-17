@@ -58,7 +58,6 @@ class HomeViewModel @Inject constructor(
         loadTopRatedMovies()
     }
 
-
     private fun loadUpcomingMovies() {
         viewModelScope.launch {
             try {
@@ -110,21 +109,6 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-
-    /*private fun loadMovieDetails() {
-        viewModelScope.launch {
-            try {
-                val movies = getUpcomingUseCase.invoke()
-                _upcomingUiState.value = UiState.Success(
-                    data = movies?.results ?: emptyList()
-                )
-            } catch (e: Exception) {
-                _upcomingUiState.value = UiState.Error(e.message ?: "Unexpected error")
-            }
-        }
-    }*/
-
-
 }
 
 

@@ -45,7 +45,6 @@ class AllMoviesViewModel @Inject constructor(
                         MovieSection.MovieSectionType.TOP_RATED -> getTopRatedUseCase.invoke()?.results.orEmpty()
                         MovieSection.MovieSectionType.POPULAR -> getPopularUseCase.invoke()?.results.orEmpty()
                         MovieSection.MovieSectionType.DEFAULT -> emptyList()
-                        null -> emptyList()
                     }
                     UiState.Success(movies)
                 } else {
