@@ -63,7 +63,7 @@ class HomeViewModel @Inject constructor(
             try {
                 val movies = getUpcomingUseCase.invoke()
                 _upcomingUiState.value = UiState.Success(
-                    data = movies?.results ?: emptyList()
+                    data = movies?.movies ?: emptyList()
                 )
             } catch (e: Exception) {
                 _upcomingUiState.value = UiState.Error(e.message ?: "Unexpected error")
@@ -76,7 +76,7 @@ class HomeViewModel @Inject constructor(
             try {
                 val movies = getNowPlayingUseCase.invoke()
                 _nowPlayingUiState.value = UiState.Success(
-                    data = movies?.results ?: emptyList()
+                    data = movies?.movies ?: emptyList()
                 )
             } catch (e: Exception) {
                 _nowPlayingUiState.value = UiState.Error(e.message ?: "Unexpected error")
@@ -89,7 +89,7 @@ class HomeViewModel @Inject constructor(
             try {
                 val movies = getTopRatedUseCase.invoke()
                 _topRatedUiState.value = UiState.Success(
-                    data = movies?.results ?: emptyList()
+                    data = movies?.movies ?: emptyList()
                 )
             } catch (e: Exception) {
                 _topRatedUiState.value = UiState.Error(e.message ?: "Unexpected error")
@@ -102,7 +102,7 @@ class HomeViewModel @Inject constructor(
             try {
                 val movies = getPopularUseCase.invoke()
                 _popularUiState.value = UiState.Success(
-                    data = movies?.results ?: emptyList()
+                    data = movies?.movies ?: emptyList()
                 )
             } catch (e: Exception) {
                 _popularUiState.value = UiState.Error(e.message ?: "Unexpected error")

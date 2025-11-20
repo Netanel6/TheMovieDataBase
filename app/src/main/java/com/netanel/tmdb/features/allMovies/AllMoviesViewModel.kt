@@ -34,21 +34,22 @@ class AllMoviesViewModel @Inject constructor(
         MutableStateFlow(UiState.Loading)
     val moviesUiState: StateFlow<UiState<List<Movie>>> = _moviesUiState.asStateFlow()
 
+    // TODO: Check how this function is affected once lazy loading
     fun handleMoviesUiState(movieSection: MovieSection.MovieSectionType?, query: String?) {
         _moviesUiState.value = UiState.Loading
         viewModelScope.launch {
             _moviesUiState.value = try {
                 if (movieSection != null) {
                     val movies = when (movieSection) {
-                        MovieSection.MovieSectionType.UPCOMING -> getUpcomingUseCase.invoke()?.results.orEmpty()
-                        MovieSection.MovieSectionType.NOW_PLAYING -> getNowPlayingUseCase.invoke()?.results.orEmpty()
-                        MovieSection.MovieSectionType.TOP_RATED -> getTopRatedUseCase.invoke()?.results.orEmpty()
-                        MovieSection.MovieSectionType.POPULAR -> getPopularUseCase.invoke()?.results.orEmpty()
+                        MovieSection.MovieSectionType.UPCOMING -> getUpcomingUseCase.invoke()?.movies.orEmpty()
+                        MovieSection.MovieSectionType.NOW_PLAYING -> getNowPlayingUseCase.invoke()?.movies.orEmpty()
+                        MovieSection.MovieSectionType.TOP_RATED -> getTopRatedUseCase.invoke()?.movies.orEmpty()
+                        MovieSection.MovieSectionType.POPULAR -> getPopularUseCase.invoke()?.movies.orEmpty()
                         MovieSection.MovieSectionType.DEFAULT -> emptyList()
                     }
                     UiState.Success(movies)
                 } else {
-                    val movies = searchUseCase.invoke(query!!)?.results.orEmpty()
+                    val movies = searchUseCase.invoke(query!!)?.movies.orEmpty()
                     UiState.Success(movies)
                 }
 

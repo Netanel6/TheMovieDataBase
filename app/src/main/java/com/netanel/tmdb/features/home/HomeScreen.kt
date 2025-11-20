@@ -22,6 +22,7 @@ import com.netanel.tmdb.domain.models.Movie
 import com.netanel.tmdb.domain.models.MovieSection
 import com.netanel.tmdb.domain.models.MovieSection.MovieSectionType
 import com.netanel.tmdb.domain.models.UiState
+import kotlinx.coroutines.delay
 
 
 /**
@@ -58,7 +59,7 @@ fun HomeScreen(
 
     LaunchedEffect(query) {
         if (query.isNotBlank()) {
-            kotlinx.coroutines.delay(500)
+            delay(500)
             searchViewModel.searchMovies()
         }
     }
