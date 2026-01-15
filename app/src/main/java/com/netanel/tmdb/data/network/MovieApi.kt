@@ -17,28 +17,24 @@ interface MovieApi {
     suspend fun getUpcomingMovies(
         @Url fullUrl: String,
         @Query("language") language: String = "en-US",
-        @Query("page") page: Int = 1
     ): Response<MovieResponse?>
 
     @GET
     suspend fun getNowPlayingMovies(
         @Url fullUrl: String,
         @Query("language") language: String = "en-US",
-        @Query("page") page: Int = 1
     ): Response<MovieResponse?>
 
     @GET
     suspend fun getTopRatedMovies(
         @Url fullUrl: String,
         @Query("language") language: String = "en-US",
-        @Query("page") page: Int = 1
     ): Response<MovieResponse?>
 
     @GET
     suspend fun getPopularMovies(
         @Url fullUrl: String,
         @Query("language") language: String = "en-US",
-        @Query("page") page: Int = 1
     ): Response<MovieResponse?>
 
 

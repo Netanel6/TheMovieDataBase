@@ -17,6 +17,5 @@ interface SearchApi {
     suspend fun searchMovieByQuery(
         @Url fullUrl: String,
         @Query("language") language: String = "en-US",
-        @Query("page") page: Int = 1
     ): Response<MovieResponse>
 }
