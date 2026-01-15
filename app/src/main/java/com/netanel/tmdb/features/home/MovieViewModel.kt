@@ -61,7 +61,7 @@ class HomeViewModel @Inject constructor(
     private fun loadUpcomingMovies() {
         viewModelScope.launch {
             try {
-                val movies = getUpcomingUseCase.invoke()
+                val movies = getUpcomingUseCase.invoke(1)
                 _upcomingUiState.value = UiState.Success(
                     data = movies?.movies ?: emptyList()
                 )
@@ -74,7 +74,7 @@ class HomeViewModel @Inject constructor(
     private fun loadNowPlayingMovies() {
         viewModelScope.launch {
             try {
-                val movies = getNowPlayingUseCase.invoke()
+                val movies = getNowPlayingUseCase.invoke(1)
                 _nowPlayingUiState.value = UiState.Success(
                     data = movies?.movies ?: emptyList()
                 )
@@ -87,7 +87,7 @@ class HomeViewModel @Inject constructor(
     private fun loadTopRatedMovies() {
         viewModelScope.launch {
             try {
-                val movies = getTopRatedUseCase.invoke()
+                val movies = getTopRatedUseCase.invoke(1)
                 _topRatedUiState.value = UiState.Success(
                     data = movies?.movies ?: emptyList()
                 )
@@ -100,7 +100,7 @@ class HomeViewModel @Inject constructor(
     private fun loadPopularMovies() {
         viewModelScope.launch {
             try {
-                val movies = getPopularUseCase.invoke()
+                val movies = getPopularUseCase.invoke(1)
                 _popularUiState.value = UiState.Success(
                     data = movies?.movies ?: emptyList()
                 )

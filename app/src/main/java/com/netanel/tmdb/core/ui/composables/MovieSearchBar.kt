@@ -59,7 +59,7 @@ fun MovieSearchBar(
 
         LazyVerticalGrid(
             modifier = modifier,
-            columns = GridCells.Adaptive(minSize = 140.dp),
+            columns = GridCells.Fixed(count = 3),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp)
