@@ -19,7 +19,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    // 🔹 Interceptor שאחראי להוסיף את ה-Authorization Header לכל בקשה
     @Provides
     @Singleton
     fun provideAuthInterceptor(): Interceptor {

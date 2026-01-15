@@ -85,22 +85,6 @@ fun MovieDetailsContent(data: MovieDetailsResponse) {
                 )
             )
     ) {
-        /*Row(
-            modifier = Modifier
-                .padding(16.dp)
-        ) {
-            GlideImage(
-                model = Constants.IMAGES_URL + data.posterPath,
-                contentDescription = data.title,
-                modifier = Modifier
-                    .width(120.dp)
-                    .height(180.dp)
-                    .clip(RoundedCornerShape(12.dp))
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-
-        }*/
-
         Column(
         ) {
             Text(

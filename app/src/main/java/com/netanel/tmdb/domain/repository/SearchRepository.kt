@@ -15,10 +15,10 @@ import javax.inject.Inject
 class SearchRepositoryImpl @Inject constructor(
     private val searchApi: SearchApi
 ) : SearchRepository {
-    override suspend fun searchMovieByQuery(query: String): MovieResponse? {
+    override suspend fun searchMovieByQuery(query: String, page: Int): MovieResponse? {
         val encodedQuery = Uri.encode(query)
         val response = searchApi.searchMovieByQuery(
-            fullUrl = "${Constants.MOVIES_URL}search/movie?query=$encodedQuery"
+            fullUrl = "${Constants.MOVIES_URL}search/movie?query=$encodedQuery&page=$page"
         )
         return if (response.isSuccessful) response.body() else null
     }
@@ -26,5 +26,5 @@ class SearchRepositoryImpl @Inject constructor(
 }
 
 interface SearchRepository {
-    suspend fun searchMovieByQuery(query: String): MovieResponse?
+    suspend fun searchMovieByQuery(query: String, page: Int): MovieResponse?
 }

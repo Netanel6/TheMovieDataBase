@@ -12,8 +12,8 @@ import javax.inject.Inject
 class GetTopRatedUseCase @Inject constructor(
     private val repository: MovieRepository
 ) {
-    suspend operator fun invoke(): MovieResponse? {
-        val movies = repository.getTopRatedMovies()
+    suspend operator fun invoke(page: Int): MovieResponse? {
+        val movies = repository.getTopRatedMovies(page)
         return movies
     }
 }

@@ -58,13 +58,12 @@ class HomeViewModel @Inject constructor(
         loadTopRatedMovies()
     }
 
-
     private fun loadUpcomingMovies() {
         viewModelScope.launch {
             try {
-                val movies = getUpcomingUseCase.invoke()
+                val movies = getUpcomingUseCase.invoke(1)
                 _upcomingUiState.value = UiState.Success(
-                    data = movies?.results ?: emptyList()
+                    data = movies?.movies ?: emptyList()
                 )
             } catch (e: Exception) {
                 _upcomingUiState.value = UiState.Error(e.message ?: "Unexpected error")
@@ -75,9 +74,9 @@ class HomeViewModel @Inject constructor(
     private fun loadNowPlayingMovies() {
         viewModelScope.launch {
             try {
-                val movies = getNowPlayingUseCase.invoke()
+                val movies = getNowPlayingUseCase.invoke(1)
                 _nowPlayingUiState.value = UiState.Success(
-                    data = movies?.results ?: emptyList()
+                    data = movies?.movies ?: emptyList()
                 )
             } catch (e: Exception) {
                 _nowPlayingUiState.value = UiState.Error(e.message ?: "Unexpected error")
@@ -88,9 +87,9 @@ class HomeViewModel @Inject constructor(
     private fun loadTopRatedMovies() {
         viewModelScope.launch {
             try {
-                val movies = getTopRatedUseCase.invoke()
+                val movies = getTopRatedUseCase.invoke(1)
                 _topRatedUiState.value = UiState.Success(
-                    data = movies?.results ?: emptyList()
+                    data = movies?.movies ?: emptyList()
                 )
             } catch (e: Exception) {
                 _topRatedUiState.value = UiState.Error(e.message ?: "Unexpected error")
@@ -101,30 +100,15 @@ class HomeViewModel @Inject constructor(
     private fun loadPopularMovies() {
         viewModelScope.launch {
             try {
-                val movies = getPopularUseCase.invoke()
+                val movies = getPopularUseCase.invoke(1)
                 _popularUiState.value = UiState.Success(
-                    data = movies?.results ?: emptyList()
+                    data = movies?.movies ?: emptyList()
                 )
             } catch (e: Exception) {
                 _popularUiState.value = UiState.Error(e.message ?: "Unexpected error")
             }
         }
     }
-
-    /*private fun loadMovieDetails() {
-        viewModelScope.launch {
-            try {
-                val movies = getUpcomingUseCase.invoke()
-                _upcomingUiState.value = UiState.Success(
-                    data = movies?.results ?: emptyList()
-                )
-            } catch (e: Exception) {
-                _upcomingUiState.value = UiState.Error(e.message ?: "Unexpected error")
-            }
-        }
-    }*/
-
-
 }
 
 

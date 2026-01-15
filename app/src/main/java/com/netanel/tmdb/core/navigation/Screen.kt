@@ -2,7 +2,6 @@ package com.netanel.tmdb.core.navigation
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -14,7 +13,6 @@ import com.netanel.tmdb.domain.models.MovieSection
 import com.netanel.tmdb.features.allMovies.AllMoviesScreen
 import com.netanel.tmdb.features.home.HomeScreen
 import com.netanel.tmdb.features.movieDetails.MovieDetailsScreen
-import java.io.Serializable
 
 typealias MovieSectionType = MovieSection.MovieSectionType
 
@@ -26,10 +24,15 @@ sealed class Screen(val route: String) {
 
     data object AllMovies : Screen("allMovies") {
         const val SECTION_KEY = "sectionType"
-        val routeWithArgs = "allMovies/{$SECTION_KEY}"
+        const val QUERY_KEY = "query"
+        val routeWithSection = "allMovies/section/{$SECTION_KEY}"
+        val routeWithQuery = "allMovies/search/{$QUERY_KEY}"
 
-        fun createRoute(movieSectionType: MovieSectionType) =
-            "allMovies/${movieSectionType.name}"
+        fun createRouteWithSection(movieSectionType: MovieSectionType?) =
+            "allMovies/section/${movieSectionType?.name}"
+
+        fun createRouteWithQuery(query: String?) =
+            "allMovies/search/${query}"
     }
 }
 
@@ -47,8 +50,17 @@ fun TmdbNavGraph(navController: NavHostController, innerPadding: PaddingValues) 
                 onMovieDetailsClicked = { movie ->
                     navController.navigate(Screen.Details.createRoute(movie.id))
                 },
-                onViewAllClicked = { movieSectionType ->
-                    navController.navigate(Screen.AllMovies.createRoute(movieSectionType))
+                onViewAllClicked = { movieSectionType, query ->
+                    movieSectionType?.let {
+                        navController.navigate(
+                            Screen.AllMovies.createRouteWithSection(
+                                movieSectionType
+                            )
+                        )
+                    }
+                    query?.let {
+                        navController.navigate(Screen.AllMovies.createRouteWithQuery(query))
+                    }
                 }
             )
         }
@@ -59,7 +71,7 @@ fun TmdbNavGraph(navController: NavHostController, innerPadding: PaddingValues) 
         }
 
         composable(
-            route = Screen.AllMovies.routeWithArgs,
+            route = Screen.AllMovies.routeWithSection,
             arguments = listOf(
                 navArgument(Screen.AllMovies.SECTION_KEY) {
                     type = NavType.EnumType(MovieSectionType::class.java)
@@ -71,9 +83,38 @@ fun TmdbNavGraph(navController: NavHostController, innerPadding: PaddingValues) 
                 MovieSectionType::class.java
             ) as MovieSectionType?
 
+
             if (sectionType != null) {
                 AllMoviesScreen(
                     sectionType = sectionType,
+                    query = null,
+                    onMovieDetailsClicked = { movie ->
+                        navController.navigate(Screen.Details.createRoute(movie.id))
+                    },
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            } else {
+                navController.popBackStack()
+            }
+        }
+
+        composable(
+            route = Screen.AllMovies.routeWithQuery,
+            arguments = listOf(
+                navArgument(Screen.AllMovies.QUERY_KEY) {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val query = backStackEntry.arguments?.getSerializable(
+                Screen.AllMovies.QUERY_KEY,
+                String::class.java
+            ) as String?
+
+            if (query != null) {
+                AllMoviesScreen(
+                    sectionType = null,
+                    query = query,
                     onMovieDetailsClicked = { movie ->
                         navController.navigate(Screen.Details.createRoute(movie.id))
                     },

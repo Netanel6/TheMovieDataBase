@@ -22,6 +22,7 @@ import com.netanel.tmdb.domain.models.Movie
 import com.netanel.tmdb.domain.models.MovieSection
 import com.netanel.tmdb.domain.models.MovieSection.MovieSectionType
 import com.netanel.tmdb.domain.models.UiState
+import kotlinx.coroutines.delay
 
 
 /**
@@ -32,7 +33,7 @@ import com.netanel.tmdb.domain.models.UiState
 fun HomeScreen(
     modifier: Modifier = Modifier,
     onMovieDetailsClicked: (Movie) -> Unit,
-    onViewAllClicked: (MovieSectionType) -> Unit
+    onViewAllClicked: (MovieSectionType?, String?) -> Unit
 ) {
     val homeViewModel: HomeViewModel = hiltViewModel()
     val searchViewModel: SearchViewModel = hiltViewModel()
@@ -58,7 +59,7 @@ fun HomeScreen(
 
     LaunchedEffect(query) {
         if (query.isNotBlank()) {
-            kotlinx.coroutines.delay(500)
+            delay(500)
             searchViewModel.searchMovies()
         }
     }
@@ -81,8 +82,8 @@ private fun HomeScreenContent(
     modifier: Modifier = Modifier,
     sections: List<MovieSection>,
     onMovieDetailsClicked: (Movie) -> Unit = { },
-    onViewAllClicked: (MovieSectionType) -> Unit = { },
-    query: String = "",
+    onViewAllClicked: (MovieSectionType?, String?) -> Unit = { _, _ -> },
+    query: String? = null,
     onQueryChange: (String) -> Unit = { },
     onSearchClicked: () -> Unit = { },
     moviesResults: List<Movie> = emptyList()
@@ -114,6 +115,7 @@ private fun HomeScreenContent(
             onQueryChange = onQueryChange,
             onSearchClicked = onSearchClicked,
             onMovieClicked = onMovieDetailsClicked,
+            onViewAllClicked = onViewAllClicked,
             movies = moviesResults
         )
 

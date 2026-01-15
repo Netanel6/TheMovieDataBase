@@ -18,30 +18,30 @@ class MovieRepositoryImpl @Inject constructor(
     private val movieDetailsApi: MovieDetailsApi
 ) : MovieRepository {
 
-    override suspend fun getUpcomingMovies(): MovieResponse? {
+    override suspend fun getUpcomingMovies(page: Int): MovieResponse? {
         val response = movieApi.getUpcomingMovies(
-            fullUrl = "${Constants.MOVIES_URL}movie/upcoming"
+            fullUrl = "${Constants.MOVIES_URL}movie/upcoming?page=$page"
         )
         return if (response.isSuccessful) response.body() else null
     }
 
-    override suspend fun getNowPlayingMovies(): MovieResponse? {
+    override suspend fun getNowPlayingMovies(page: Int): MovieResponse? {
         val response = movieApi.getNowPlayingMovies(
-            fullUrl = "${Constants.MOVIES_URL}movie/now_playing"
+            fullUrl = "${Constants.MOVIES_URL}movie/now_playing?page=$page"
         )
         return if (response.isSuccessful) response.body() else null
     }
 
-    override suspend fun getPopularMovies(): MovieResponse? {
+    override suspend fun getPopularMovies(page: Int): MovieResponse? {
         val response = movieApi.getPopularMovies(
-            fullUrl = "${Constants.MOVIES_URL}movie/popular"
+            fullUrl = "${Constants.MOVIES_URL}movie/popular?page=$page"
         )
         return if (response.isSuccessful) response.body() else null
     }
 
-    override suspend fun getTopRatedMovies(): MovieResponse? {
+    override suspend fun getTopRatedMovies(page: Int): MovieResponse? {
         val response = movieApi.getTopRatedMovies(
-            fullUrl = "${Constants.MOVIES_URL}movie/top_rated"
+            fullUrl = "${Constants.MOVIES_URL}movie/top_rated?page=$page"
         )
         return if (response.isSuccessful) response.body() else null
     }
@@ -56,9 +56,9 @@ class MovieRepositoryImpl @Inject constructor(
 }
 
 interface MovieRepository {
-    suspend fun getNowPlayingMovies(): MovieResponse?
-    suspend fun getPopularMovies(): MovieResponse?
-    suspend fun getTopRatedMovies(): MovieResponse?
-    suspend fun getUpcomingMovies(): MovieResponse?
+    suspend fun getNowPlayingMovies(page: Int = 1): MovieResponse?
+    suspend fun getPopularMovies(page: Int = 1): MovieResponse?
+    suspend fun getTopRatedMovies(page: Int = 1): MovieResponse?
+    suspend fun getUpcomingMovies(page: Int = 1): MovieResponse?
     suspend fun getMovieDetails(movieId: Int): MovieDetailsResponse?
 }

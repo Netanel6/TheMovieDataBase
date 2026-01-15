@@ -46,9 +46,9 @@ class SearchViewModel @Inject constructor(val searchUseCase: SearchUseCase) : Vi
             _searchUiState.value = UiState.Loading
 
             try {
-                val response = searchUseCase.invoke(query = currentQuery)
+                val response = searchUseCase.invoke(query = currentQuery,  page = 1)
                 _searchUiState.value = UiState.Success(
-                    data = response?.results ?: emptyList()
+                    data = response?.movies ?: emptyList()
                 )
             } catch (e: Exception) {
                 _searchUiState.value = UiState.Error(e.message ?: "Unexpected error")

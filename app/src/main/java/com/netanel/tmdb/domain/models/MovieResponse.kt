@@ -10,7 +10,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class MovieResponse(
-    val results: List<Movie>,
+    @SerializedName("results")
+    val movies: List<Movie>,
     @SerializedName("dates")
     val date: MovieDates,
     val page: Int,

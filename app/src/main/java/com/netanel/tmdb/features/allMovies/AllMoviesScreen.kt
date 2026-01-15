@@ -4,10 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -20,10 +23,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,28 +36,30 @@ import com.netanel.tmdb.domain.models.Movie
 import com.netanel.tmdb.domain.models.MovieSection.MovieSectionType
 import com.netanel.tmdb.domain.models.UiState
 
-/**
- * Created by netanelamar on 01/11/2025.
- * NetanelCA2@gmail.com
- */
 @Composable
 fun AllMoviesScreen(
     modifier: Modifier = Modifier,
-    sectionType: MovieSectionType = MovieSectionType.DEFAULT,
+    sectionType: MovieSectionType? = null,
+    query: String? = null,
     onMovieDetailsClicked: (Movie) -> Unit = {},
     onNavigateBack: () -> Unit = {},
 ) {
-    val allMoviesViewModel: AllMoviesViewModel = hiltViewModel()
-    val movieListState by allMoviesViewModel.moviesUiState.collectAsStateWithLifecycle()
+    val vm: AllMoviesViewModel = hiltViewModel()
 
-    LaunchedEffect(sectionType) {
-        allMoviesViewModel.handleMoviesUiState(sectionType)
+    val movieListState by vm.moviesUiState.collectAsStateWithLifecycle()
+    val isLoadingMore by vm.isLoadingMore.collectAsStateWithLifecycle()
+
+    // ✅ initial load
+    LaunchedEffect(sectionType, query) {
+        vm.loadInitial(sectionType, query)
     }
 
     AllMoviesScreenContent(
         modifier = modifier,
-        title = sectionType.title,
+        title = sectionType?.title ?: (query ?: ""),
         state = movieListState,
+        isLoadingMore = isLoadingMore,
+        onLoadMore = vm::loadNextPage,
         onMovieDetailsClicked = onMovieDetailsClicked,
         onNavigateBack = onNavigateBack,
     )
@@ -61,13 +67,17 @@ fun AllMoviesScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AllMoviesScreenContent(
+private fun AllMoviesScreenContent(
     modifier: Modifier = Modifier,
     title: String,
     state: UiState<List<Movie>>,
+    isLoadingMore: Boolean,
+    onLoadMore: () -> Unit,
     onMovieDetailsClicked: (Movie) -> Unit = {},
     onNavigateBack: () -> Unit = {},
 ) {
+    val gridState = rememberLazyGridState()
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -84,104 +94,81 @@ fun AllMoviesScreenContent(
             )
         }
     ) { paddingValues ->
+
         val contentModifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
 
         when (state) {
             is UiState.Error -> {
-                Box(
-                    modifier = contentModifier,
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = state.message,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                Box(modifier = contentModifier, contentAlignment = Alignment.Center) {
+                    Text(text = state.message, style = MaterialTheme.typography.bodyMedium)
                 }
             }
 
             UiState.Loading -> {
-                Box(
-                    modifier = contentModifier,
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = contentModifier, contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
 
             is UiState.Success -> {
                 val movies = state.data
+
                 if (movies.isEmpty()) {
-                    Box(
-                        modifier = contentModifier,
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "No movies available",
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+                    Box(modifier = contentModifier, contentAlignment = Alignment.Center) {
+                        Text(text = "No movies available", style = MaterialTheme.typography.bodyMedium)
                     }
-                } else {
-                    LazyVerticalGrid(
-                        modifier = contentModifier,
-                        columns = GridCells.Adaptive(minSize = 140.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp)
-                    ) {
-                        items(movies, key = { it.id }) { movie ->
-                            MovieItem(movie = movie, onMovieDetailsClicked = onMovieDetailsClicked)
+                    return@Scaffold
+                }
+
+                val shouldLoadMore by remember(gridState, movies.size, isLoadingMore) {
+                    derivedStateOf {
+                        val layout = gridState.layoutInfo
+                        val visibleCount = layout.visibleItemsInfo.size
+                        if (visibleCount == 0) return@derivedStateOf false
+
+                        val lastVisible = gridState.firstVisibleItemIndex + visibleCount - 1
+                        val threshold = 6
+                        lastVisible >= (movies.size - 1 - threshold)
+                    }
+                }
+
+                LaunchedEffect(shouldLoadMore) {
+                    if (shouldLoadMore && !isLoadingMore) onLoadMore()
+                }
+
+                LazyVerticalGrid(
+                    state = gridState,
+                    modifier = contentModifier,
+                    columns = GridCells.Fixed(3),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp)
+                ) {
+                    // ✅ safer keys: index + id (covers rare duplicate ids too)
+                    itemsIndexed(
+                        items = movies,
+                        key = { index, movie -> "${movie.id}-$index" }
+                    ) { _, movie ->
+                        MovieItem(movie = movie, onMovieDetailsClicked = onMovieDetailsClicked)
+                    }
+
+                    // footer loader
+                    if (isLoadingMore) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
                         }
                     }
                 }
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AllMoviesScreenPreview() {
-    AllMoviesScreenContent(
-        title = MovieSectionType.UPCOMING.title,
-        state = UiState.Success(
-            listOf(
-                Movie(
-                    isAdult = false,
-                    backdropPath = null,
-                    genreIds = emptyList(),
-                    id = 1,
-                    originalLanguage = "en",
-                    originalTitle = "Original Title",
-                    overview = "Overview",
-                    popularity = 0.0,
-                    posterPath = null,
-                    releaseDate = "2025-01-01",
-                    title = "Sample Movie",
-                    isVideo = false,
-                    voteAverage = 7.5,
-                    voteCount = 150
-                )
-            )
-        )
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AllMoviesScreenLoadingPreview() {
-    AllMoviesScreenContent(
-        title = MovieSectionType.UPCOMING.title,
-        state = UiState.Loading,
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AllMoviesScreenErrorPreview() {
-    AllMoviesScreenContent(
-        title = MovieSectionType.UPCOMING.title,
-        state = UiState.Error("Failed to load movies"),
-    )
 }

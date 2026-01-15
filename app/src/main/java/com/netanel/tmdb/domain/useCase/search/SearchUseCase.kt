@@ -11,8 +11,8 @@ import javax.inject.Inject
  */
 class SearchUseCase @Inject constructor(val repository: SearchRepository) {
 
-    suspend operator fun invoke(query: String): MovieResponse? {
-        val movies = repository.searchMovieByQuery(query)
+    suspend operator fun invoke(query: String, page: Int): MovieResponse? {
+        val movies = repository.searchMovieByQuery(query, page)
         return movies
     }
 }

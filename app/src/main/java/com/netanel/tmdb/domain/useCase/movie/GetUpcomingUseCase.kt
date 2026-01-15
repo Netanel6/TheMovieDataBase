@@ -12,8 +12,8 @@ import javax.inject.Inject
 class GetUpcomingUseCase @Inject constructor(
     private val repository: MovieRepository
 ) {
-    suspend operator fun invoke(): MovieResponse? {
-        val movies = repository.getUpcomingMovies()
+    suspend operator fun invoke(page: Int): MovieResponse? {
+        val movies = repository.getUpcomingMovies(page)
         return movies
     }
 }

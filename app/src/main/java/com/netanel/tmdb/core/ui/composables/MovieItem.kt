@@ -43,7 +43,6 @@ fun MovieItem(movie: Movie, onMovieDetailsClicked: (Movie) -> Unit) {
         modifier = Modifier
             .wrapContentSize()
             .padding(4.dp)
-            // FIX: מעביר את ה-shape ישירות ל-border
             .border(
                 border = BorderStroke(0.3.dp, Color.White),
                 shape = RoundedCornerShape(12.dp)
@@ -74,16 +73,6 @@ fun MovieItem(movie: Movie, onMovieDetailsClicked: (Movie) -> Unit) {
                     )
                 }
             }
-
-           /* Text(
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .width(120.dp)
-                    .padding(vertical = 8.dp),
-                textAlign = TextAlign.Center,
-                text = "${movie.title} (${movie.originalTitle})"
-            )*/
         }
     }
 }
@@ -95,15 +84,15 @@ fun MovieItemPreview() {
     MovieItem(
         Movie(
             isAdult = false,
-            backdropPath = "/7QirCB1o80NEFpQGlQRZerZbQEp.jpg", // A valid backdrop path
+            backdropPath = "/7QirCB1o80NEFpQGlQRZerZbQEp.jpg",
             genreIds = listOf(10749, 18),
             id = 1156594,
             originalLanguage = "es",
             originalTitle = "Culpa nuestra",
             overview = "Jenna and Lion's wedding brings about the long-awaited reunion between Noah and Nick after their breakup. Nick's inability to forgive Noah stands as an insurmountable barrier. He, heir to his grandfather's businesses, and she, starting her professional life, resist fueling a flame that's still alive. But now that their paths have crossed again, will love be stronger than resentment?",
             popularity = 1096.6654,
-            posterPath = "/yzqHt4m1SeY9FbPrfZ0C2Hi9x1s.jpg", // A valid poster path
-            releaseDate = "2025-10-15", // Date in string format
+            posterPath = "/yzqHt4m1SeY9FbPrfZ0C2Hi9x1s.jpg",
+            releaseDate = "2025-10-15",
             title = "Our Fault",
             isVideo = false,
             voteAverage = 7.854,
