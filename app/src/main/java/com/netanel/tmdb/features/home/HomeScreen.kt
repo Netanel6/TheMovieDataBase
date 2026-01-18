@@ -3,6 +3,7 @@ package com.netanel.tmdb.features.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.animation.core.animateDpAsState
@@ -163,7 +164,10 @@ private fun HomeScreenContent(
             movies = moviesResults
         )
 
-        LazyColumn(state = listState) {
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.weight(1f)
+        ) {
             items(sections.size) { index ->
                 HorizontalMoviesList(section = sections[index], onViewAllClicked = onViewAllClicked)
             }
