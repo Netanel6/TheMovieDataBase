@@ -1,11 +1,22 @@
 package com.netanel.tmdb.features.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.runtime.Composable
@@ -27,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netanel.tmdb.core.ui.composables.HeroSection
 import com.netanel.tmdb.core.ui.composables.HorizontalMoviesList
 import com.netanel.tmdb.core.ui.composables.MovieSearchBar
+import com.netanel.tmdb.core.ui.composables.MovieItem
 import com.netanel.tmdb.core.ui.theme.TMDBTheme
 import com.netanel.tmdb.domain.models.Movie
 import com.netanel.tmdb.domain.models.MovieSection
@@ -130,7 +142,12 @@ private fun HomeScreenContent(
         }
     }
 
-    Column(
+    val heroMovie = sections.firstOrNull { it.movieSectionType == MovieSectionType.TOP_RATED }
+        ?.state
+        ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
+
+    LazyColumn(
+        state = listState,
         modifier = modifier
             .fillMaxSize()
             .background(
@@ -140,37 +157,61 @@ private fun HomeScreenContent(
                 )
             )
     ) {
-        val heroMovie = sections.firstOrNull { it.movieSectionType == MovieSectionType.TOP_RATED }
-            ?.state
-            ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
-
-        heroMovie?.let {
-            HeroSection(
-                movie = it,
-                height = animatedHeroHeight
-            ) { clickedMovie ->
-                onMovieDetailsClicked(clickedMovie)
+        item {
+            heroMovie?.let {
+                HeroSection(
+                    movie = it,
+                    height = animatedHeroHeight
+                ) { clickedMovie ->
+                    onMovieDetailsClicked(clickedMovie)
+                }
             }
         }
 
-        MovieSearchBar(
-            query = query,
-            onQueryChange = onQueryChange,
-            onSearchClicked = onSearchClicked,
-            onMovieClicked = onMovieDetailsClicked,
-            onViewAllClicked = onViewAllClicked,
-            active = searchActive,
-            onActiveChange = { searchActive = it },
-            movies = moviesResults
-        )
+        item {
+            MovieSearchBar(
+                query = query,
+                onQueryChange = onQueryChange,
+                onSearchClicked = onSearchClicked,
+                active = searchActive,
+                onActiveChange = { searchActive = it }
+            )
+        }
 
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.weight(1f)
-        ) {
-            items(sections.size) { index ->
-                HorizontalMoviesList(section = sections[index], onViewAllClicked = onViewAllClicked)
+        if (searchActive || !query.isNullOrBlank()) {
+            item {
+                LazyVerticalGrid(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 400.dp),
+                    columns = GridCells.Fixed(count = 3),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 24.dp)
+                ) {
+                    items(moviesResults, key = { it.id }) { movie ->
+                        MovieItem(movie = movie, onMovieDetailsClicked = { onMovieDetailsClicked(movie) })
+                    }
+                    if (!query.isNullOrBlank()) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Button(onClick = { onViewAllClicked(null, query) }) {
+                                    Text("View All")
+                                }
+                            }
+                        }
+                    }
+                }
             }
+        }
+
+        items(sections.size) { index ->
+            HorizontalMoviesList(section = sections[index], onViewAllClicked = onViewAllClicked)
         }
     }
 }
