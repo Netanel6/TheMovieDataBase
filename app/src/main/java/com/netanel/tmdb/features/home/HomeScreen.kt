@@ -1,6 +1,7 @@
 package com.netanel.tmdb.features.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -10,7 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -96,6 +99,7 @@ private fun HomeScreenContent(
 ) {
 
     val listState = rememberLazyListState()
+    var searchActive by remember { mutableStateOf(false) }
     val maxHeroHeight = 400.dp
     val density = LocalDensity.current
     val maxHeroHeightPx = with(density) { maxHeroHeight.toPx() }
@@ -109,7 +113,7 @@ private fun HomeScreenContent(
         }
     }
     val targetHeroHeightPx = when {
-        !query.isNullOrBlank() -> 0f
+        searchActive || !query.isNullOrBlank() -> 0f
         else -> (maxHeroHeightPx - scrollOffsetPx).coerceIn(0f, maxHeroHeightPx)
     }
     val targetHeroHeightDp = with(density) { targetHeroHeightPx.toDp() }
@@ -119,8 +123,13 @@ private fun HomeScreenContent(
         label = "heroHeight"
     )
 
-    LazyColumn(
-        state = listState,
+    LaunchedEffect(query) {
+        if (query.isNullOrBlank()) {
+            searchActive = false
+        }
+    }
+
+    Column(
         modifier = modifier
             .fillMaxSize()
             .background(
@@ -134,30 +143,30 @@ private fun HomeScreenContent(
             ?.state
             ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
 
-        item {
-            heroMovie?.let {
-                HeroSection(
-                    movie = it,
-                    height = animatedHeroHeight
-                ) { clickedMovie ->
-                    onMovieDetailsClicked(clickedMovie)
-                }
+        heroMovie?.let {
+            HeroSection(
+                movie = it,
+                height = animatedHeroHeight
+            ) { clickedMovie ->
+                onMovieDetailsClicked(clickedMovie)
             }
         }
 
-        item {
-            MovieSearchBar(
-                query = query,
-                onQueryChange = onQueryChange,
-                onSearchClicked = onSearchClicked,
-                onMovieClicked = onMovieDetailsClicked,
-                onViewAllClicked = onViewAllClicked,
-                movies = moviesResults
-            )
-        }
+        MovieSearchBar(
+            query = query,
+            onQueryChange = onQueryChange,
+            onSearchClicked = onSearchClicked,
+            onMovieClicked = onMovieDetailsClicked,
+            onViewAllClicked = onViewAllClicked,
+            active = searchActive,
+            onActiveChange = { searchActive = it },
+            movies = moviesResults
+        )
 
-        items(sections.size) { index ->
-            HorizontalMoviesList(section = sections[index], onViewAllClicked = onViewAllClicked)
+        LazyColumn(state = listState) {
+            items(sections.size) { index ->
+                HorizontalMoviesList(section = sections[index], onViewAllClicked = onViewAllClicked)
+            }
         }
     }
 }

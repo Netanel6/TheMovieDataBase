@@ -18,10 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -36,20 +32,20 @@ fun MovieSearchBar(
     onSearchClicked: () -> Unit,
     onMovieClicked: (Movie) -> Unit,
     onViewAllClicked: (MovieSection.MovieSectionType?, String?) -> Unit,
+    active: Boolean,
+    onActiveChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     movies: List<Movie>
 ) {
-    var active by remember { mutableStateOf(false) }
-
     SearchBar(
         query = query ?: "",
         onQueryChange = onQueryChange,
         onSearch = {
-            active = false
+            onActiveChange(false)
             onSearchClicked()
         },
         active = active,
-        onActiveChange = { active = it },
+        onActiveChange = onActiveChange,
         placeholder = { Text("Search movies...") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         modifier = modifier
