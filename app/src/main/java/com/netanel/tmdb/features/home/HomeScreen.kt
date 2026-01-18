@@ -1,7 +1,6 @@
 package com.netanel.tmdb.features.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -120,7 +119,8 @@ private fun HomeScreenContent(
         label = "heroHeight"
     )
 
-    Column(
+    LazyColumn(
+        state = listState,
         modifier = modifier
             .fillMaxSize()
             .background(
@@ -134,30 +134,30 @@ private fun HomeScreenContent(
             ?.state
             ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
 
-        heroMovie?.let {
-            HeroSection(
-                movie = it,
-                height = animatedHeroHeight
-            ) { clickedMovie ->
-                onMovieDetailsClicked(clickedMovie)
+        item {
+            heroMovie?.let {
+                HeroSection(
+                    movie = it,
+                    height = animatedHeroHeight
+                ) { clickedMovie ->
+                    onMovieDetailsClicked(clickedMovie)
+                }
             }
         }
 
+        item {
+            MovieSearchBar(
+                query = query,
+                onQueryChange = onQueryChange,
+                onSearchClicked = onSearchClicked,
+                onMovieClicked = onMovieDetailsClicked,
+                onViewAllClicked = onViewAllClicked,
+                movies = moviesResults
+            )
+        }
 
-        MovieSearchBar(
-            query = query,
-            onQueryChange = onQueryChange,
-            onSearchClicked = onSearchClicked,
-            onMovieClicked = onMovieDetailsClicked,
-            onViewAllClicked = onViewAllClicked,
-            movies = moviesResults
-        )
-
-
-        LazyColumn(state = listState) {
-            items(sections.size) { index ->
-                HorizontalMoviesList(section = sections[index], onViewAllClicked = onViewAllClicked)
-            }
+        items(sections.size) { index ->
+            HorizontalMoviesList(section = sections[index], onViewAllClicked = onViewAllClicked)
         }
     }
 }
