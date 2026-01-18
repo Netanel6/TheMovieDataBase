@@ -4,14 +4,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netanel.tmdb.core.ui.composables.HeroSection
@@ -89,6 +96,30 @@ private fun HomeScreenContent(
     moviesResults: List<Movie> = emptyList()
 ) {
 
+    val listState = rememberLazyListState()
+    val maxHeroHeight = 400.dp
+    val density = LocalDensity.current
+    val maxHeroHeightPx = with(density) { maxHeroHeight.toPx() }
+    val scrollOffsetPx by remember {
+        derivedStateOf {
+            if (listState.firstVisibleItemIndex > 0) {
+                maxHeroHeightPx
+            } else {
+                listState.firstVisibleItemScrollOffset.toFloat()
+            }
+        }
+    }
+    val targetHeroHeightPx = when {
+        !query.isNullOrBlank() -> 0f
+        else -> (maxHeroHeightPx - scrollOffsetPx).coerceIn(0f, maxHeroHeightPx)
+    }
+    val targetHeroHeightDp = with(density) { targetHeroHeightPx.toDp() }
+    val animatedHeroHeight by animateDpAsState(
+        targetValue = targetHeroHeightDp,
+        animationSpec = spring(),
+        label = "heroHeight"
+    )
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -104,7 +135,10 @@ private fun HomeScreenContent(
             ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
 
         heroMovie?.let {
-            HeroSection(it) { clickedMovie ->
+            HeroSection(
+                movie = it,
+                height = animatedHeroHeight
+            ) { clickedMovie ->
                 onMovieDetailsClicked(clickedMovie)
             }
         }
@@ -120,7 +154,7 @@ private fun HomeScreenContent(
         )
 
 
-        LazyColumn {
+        LazyColumn(state = listState) {
             items(sections.size) { index ->
                 HorizontalMoviesList(section = sections[index], onViewAllClicked = onViewAllClicked)
             }
@@ -175,4 +209,3 @@ private val previewMovie = Movie(
     voteAverage = 7.854,
     voteCount = 305
 )
-
