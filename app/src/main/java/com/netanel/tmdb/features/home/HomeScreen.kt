@@ -10,9 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -98,7 +96,6 @@ private fun HomeScreenContent(
 ) {
 
     val listState = rememberLazyListState()
-    var searchActive by remember { mutableStateOf(false) }
     val maxHeroHeight = 400.dp
     val density = LocalDensity.current
     val maxHeroHeightPx = with(density) { maxHeroHeight.toPx() }
@@ -111,9 +108,10 @@ private fun HomeScreenContent(
             }
         }
     }
-    val targetHeroHeightPx = when {
-        searchActive || !query.isNullOrBlank() -> 0f
-        else -> (maxHeroHeightPx - scrollOffsetPx).coerceIn(0f, maxHeroHeightPx)
+    val targetHeroHeightPx = if (!query.isNullOrBlank()) {
+        0f
+    } else {
+        (maxHeroHeightPx - scrollOffsetPx).coerceIn(0f, maxHeroHeightPx)
     }
     val targetHeroHeightDp = with(density) { targetHeroHeightPx.toDp() }
     val animatedHeroHeight by animateDpAsState(
@@ -121,12 +119,6 @@ private fun HomeScreenContent(
         animationSpec = spring(),
         label = "heroHeight"
     )
-
-    LaunchedEffect(query) {
-        if (query.isNullOrBlank()) {
-            searchActive = false
-        }
-    }
 
     val heroMovie = sections.firstOrNull { it.movieSectionType == MovieSectionType.TOP_RATED }
         ?.state
@@ -161,8 +153,6 @@ private fun HomeScreenContent(
                 onSearchClicked = onSearchClicked,
                 onMovieClicked = onMovieDetailsClicked,
                 onViewAllClicked = onViewAllClicked,
-                active = searchActive,
-                onActiveChange = { searchActive = it },
                 movies = moviesResults
             )
         }
