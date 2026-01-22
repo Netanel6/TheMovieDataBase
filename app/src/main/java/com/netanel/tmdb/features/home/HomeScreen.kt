@@ -1,7 +1,9 @@
 package com.netanel.tmdb.features.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.animation.core.animateDpAsState
@@ -124,8 +126,7 @@ private fun HomeScreenContent(
         ?.state
         ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
 
-    LazyColumn(
-        state = listState,
+    Column(
         modifier = modifier
             .fillMaxSize()
             .background(
@@ -135,33 +136,33 @@ private fun HomeScreenContent(
                 )
             )
     ) {
-        item {
-            heroMovie?.let {
-                HeroSection(
-                    movie = it,
-                    height = animatedHeroHeight
-                ) { clickedMovie ->
-                    onMovieDetailsClicked(clickedMovie)
-                }
+        heroMovie?.let {
+            HeroSection(
+                movie = it,
+                height = animatedHeroHeight
+            ) { clickedMovie ->
+                onMovieDetailsClicked(clickedMovie)
             }
         }
 
-        item {
-            MovieSearchBar(
-                query = query,
-                onQueryChange = onQueryChange,
-                onSearchClicked = onSearchClicked,
-                onMovieClicked = onMovieDetailsClicked,
-                onViewAllClicked = onViewAllClicked,
-                movies = moviesResults
-            )
-        }
+        MovieSearchBar(
+            query = query,
+            onQueryChange = onQueryChange,
+            onSearchClicked = onSearchClicked,
+            onMovieClicked = onMovieDetailsClicked,
+            onViewAllClicked = onViewAllClicked,
+            movies = moviesResults
+        )
 
-        items(sections.size) { index ->
-            HorizontalMoviesList(section = sections[index], onViewAllClicked = onViewAllClicked)
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.weight(1f)
+        ) {
+            items(sections.size) { index ->
+                HorizontalMoviesList(section = sections[index], onViewAllClicked = onViewAllClicked)
+            }
         }
     }
-}
 
 
 @Preview(showBackground = true, device = Devices.PIXEL_7)
