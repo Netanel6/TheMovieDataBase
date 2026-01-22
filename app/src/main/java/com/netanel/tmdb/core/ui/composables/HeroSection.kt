@@ -29,11 +29,15 @@ import com.netanel.tmdb.domain.models.Movie
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun HeroSection(movie: Movie?, onDetailsClick: (movie: Movie) -> Unit) {
+fun HeroSection(
+    movie: Movie?,
+    modifier: Modifier = Modifier,
+    onDetailsClick: (movie: Movie) -> Unit
+) {
     val context = LocalContext.current
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(400.dp)
     ) {

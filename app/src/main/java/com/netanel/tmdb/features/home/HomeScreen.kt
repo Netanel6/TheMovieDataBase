@@ -1,15 +1,19 @@
 package com.netanel.tmdb.features.home
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -88,8 +92,19 @@ private fun HomeScreenContent(
     onSearchClicked: () -> Unit = { },
     moviesResults: List<Movie> = emptyList()
 ) {
+    val listState = rememberLazyListState()
+    val heroScrollProgress by remember(listState) {
+        derivedStateOf {
+            if (listState.firstVisibleItemIndex > 0) {
+                1f
+            } else {
+                (listState.firstVisibleItemScrollOffset / 600f).coerceIn(0f, 1f)
+            }
+        }
+    }
+    val animatedHeroProgress by animateFloatAsState(targetValue = heroScrollProgress, label = "heroScroll")
 
-    Column(
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .background(
@@ -97,33 +112,43 @@ private fun HomeScreenContent(
                     colors = listOf(Color.Transparent, Color.Black),
                     startY = 150f
                 )
-            )
+            ),
+        state = listState
     ) {
         val heroMovie = sections.firstOrNull { it.movieSectionType == MovieSectionType.TOP_RATED }
             ?.state
             ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
 
-        heroMovie?.let {
-            HeroSection(it) { clickedMovie ->
-                onMovieDetailsClicked(clickedMovie)
+        item {
+            heroMovie?.let {
+                HeroSection(
+                    movie = it,
+                    modifier = Modifier.graphicsLayer {
+                        val clampedProgress = animatedHeroProgress.coerceIn(0f, 1f)
+                        alpha = (1f - (clampedProgress * 0.35f)).coerceIn(0.6f, 1f)
+                        scaleX = 1f - (clampedProgress * 0.08f)
+                        scaleY = 1f - (clampedProgress * 0.08f)
+                        translationY = clampedProgress * -80f
+                    }
+                ) { clickedMovie ->
+                    onMovieDetailsClicked(clickedMovie)
+                }
             }
         }
 
+        item {
+            MovieSearchBar(
+                query = query,
+                onQueryChange = onQueryChange,
+                onSearchClicked = onSearchClicked,
+                onMovieClicked = onMovieDetailsClicked,
+                onViewAllClicked = onViewAllClicked,
+                movies = moviesResults
+            )
+        }
 
-        MovieSearchBar(
-            query = query,
-            onQueryChange = onQueryChange,
-            onSearchClicked = onSearchClicked,
-            onMovieClicked = onMovieDetailsClicked,
-            onViewAllClicked = onViewAllClicked,
-            movies = moviesResults
-        )
-
-
-        LazyColumn {
-            items(sections.size) { index ->
-                HorizontalMoviesList(section = sections[index], onViewAllClicked = onViewAllClicked)
-            }
+        items(sections.size) { index ->
+            HorizontalMoviesList(section = sections[index], onViewAllClicked = onViewAllClicked)
         }
     }
 }
@@ -175,4 +200,3 @@ private val previewMovie = Movie(
     voteAverage = 7.854,
     voteCount = 305
 )
-
