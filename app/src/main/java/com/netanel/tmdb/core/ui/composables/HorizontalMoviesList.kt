@@ -27,7 +27,7 @@ fun HorizontalMoviesList(section: MovieSection, onViewAllClicked: (MovieSectionT
         is UiState.Loading -> CircularProgressIndicator()
         is UiState.Error -> Text(text = state.message)
         is UiState.Success -> {
-            Column(modifier = Modifier) {
+            Column(modifier = Modifier.padding(bottom = 24.dp)) {
                 Row(
                     modifier = Modifier
                         .fillMaxHeight()

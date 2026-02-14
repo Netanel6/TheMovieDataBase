@@ -98,11 +98,20 @@ private fun HomeScreenContent(
             if (listState.firstVisibleItemIndex > 0) {
                 1f
             } else {
-                (listState.firstVisibleItemScrollOffset / 600f).coerceIn(0f, 1f)
+                (listState.firstVisibleItemScrollOffset / 1000f).coerceIn(0f, 1f)
             }
         }
     }
     val animatedHeroProgress by animateFloatAsState(targetValue = heroScrollProgress, label = "heroScroll")
+
+    MovieSearchBar(
+        query = query,
+        onQueryChange = onQueryChange,
+        onSearchClicked = onSearchClicked,
+        onMovieClicked = onMovieDetailsClicked,
+        onViewAllClicked = onViewAllClicked,
+        movies = moviesResults
+    )
 
     LazyColumn(
         modifier = modifier
@@ -126,25 +135,14 @@ private fun HomeScreenContent(
                     modifier = Modifier.graphicsLayer {
                         val clampedProgress = animatedHeroProgress.coerceIn(0f, 1f)
                         alpha = (1f - (clampedProgress * 0.35f)).coerceIn(0.6f, 1f)
-                        scaleX = 1f - (clampedProgress * 0.08f)
-                        scaleY = 1f - (clampedProgress * 0.08f)
+                        scaleX = 1f - (clampedProgress * 1f)
+                        scaleY = 1f - (clampedProgress * 1f)
                         translationY = clampedProgress * -80f
                     }
                 ) { clickedMovie ->
                     onMovieDetailsClicked(clickedMovie)
                 }
             }
-        }
-
-        item {
-            MovieSearchBar(
-                query = query,
-                onQueryChange = onQueryChange,
-                onSearchClicked = onSearchClicked,
-                onMovieClicked = onMovieDetailsClicked,
-                onViewAllClicked = onViewAllClicked,
-                movies = moviesResults
-            )
         }
 
         items(sections.size) { index ->
