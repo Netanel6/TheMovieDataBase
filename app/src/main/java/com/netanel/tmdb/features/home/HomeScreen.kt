@@ -44,8 +44,8 @@ fun HomeScreen(
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
 
-    val query = searchViewModel.query.collectAsStateWithLifecycle().value
-    val searchResultsState = searchViewModel.searchUiState.collectAsStateWithLifecycle().value
+
+    val searchState by searchViewModel.uiState.collectAsStateWithLifecycle()
 
     val sections = remember(uiState.upcoming, uiState.nowPlaying, uiState.topRated, uiState.popular) {
         buildHomeSections(
@@ -58,16 +58,18 @@ fun HomeScreen(
     }
 
 
-    val searchResults = when (searchResultsState) {
-        is UiState.Success -> searchResultsState.data
-        else -> emptyList()
+    val moviesResults = remember(searchState.results) {
+        when (val r = searchState.results) {
+            is UiState.Success -> r.data
+            else -> emptyList()
+        }
     }
 
-    LaunchedEffect(query) {
-        if (query.isNotBlank()) {
-            delay(500)
-            searchViewModel.searchMovies()
-        }
+
+    LaunchedEffect(searchState.query) {
+        if (searchState.query.isBlank()) return@LaunchedEffect
+        delay(500)
+        searchViewModel.onAction(SearchViewModel.SearchAction.SearchClicked)
     }
 
 
@@ -76,10 +78,10 @@ fun HomeScreen(
         sections = sections,
         onMovieDetailsClicked = onMovieDetailsClicked,
         onViewAllClicked = onViewAllClicked,
-        query = query,
-        onQueryChange = { searchViewModel.onQueryChanged(it) },
-        onSearchClicked = { searchViewModel.searchMovies() },
-        moviesResults = searchResults
+        query = searchState.query,
+        onQueryChange = { searchViewModel.onAction(SearchViewModel.SearchAction.QueryChanged(it)) },
+        onSearchClicked = { searchViewModel.onAction(SearchViewModel.SearchAction.SearchClicked) },
+        moviesResults = moviesResults
     )
 }
 
