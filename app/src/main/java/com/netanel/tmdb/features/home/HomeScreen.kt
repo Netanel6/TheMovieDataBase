@@ -48,18 +48,27 @@ fun HomeScreen(
     val popularState by homeViewModel.popularUiState.collectAsStateWithLifecycle()
 
     val query = searchViewModel.query.collectAsStateWithLifecycle().value
-
     val searchResultsState = searchViewModel.searchUiState.collectAsStateWithLifecycle().value
+
+    val sections = remember(
+        upcomingState,
+        nowPlayingState,
+        topRatedState,
+        popularState,
+        onMovieDetailsClicked
+    ) {
+        listOf(
+            MovieSection(MovieSectionType.UPCOMING, upcomingState, onMovieDetailsClicked),
+            MovieSection(MovieSectionType.NOW_PLAYING, nowPlayingState, onMovieDetailsClicked),
+            MovieSection(MovieSectionType.TOP_RATED, topRatedState, onMovieDetailsClicked),
+            MovieSection(MovieSectionType.POPULAR, popularState, onMovieDetailsClicked)
+        )
+    }
+
     val searchResults = when (searchResultsState) {
         is UiState.Success -> searchResultsState.data
         else -> emptyList()
     }
-    val sections = listOf(
-        MovieSection(MovieSectionType.UPCOMING, upcomingState, onMovieDetailsClicked),
-        MovieSection(MovieSectionType.NOW_PLAYING, nowPlayingState, onMovieDetailsClicked),
-        MovieSection(MovieSectionType.TOP_RATED, topRatedState, onMovieDetailsClicked),
-        MovieSection(MovieSectionType.POPULAR, popularState, onMovieDetailsClicked)
-    )
 
     LaunchedEffect(query) {
         if (query.isNotBlank()) {
@@ -92,17 +101,29 @@ private fun HomeScreenContent(
     onSearchClicked: () -> Unit = { },
     moviesResults: List<Movie> = emptyList()
 ) {
+
     val listState = rememberLazyListState()
+
     val heroScrollProgress by remember(listState) {
         derivedStateOf {
-            if (listState.firstVisibleItemIndex > 0) {
-                1f
-            } else {
-                (listState.firstVisibleItemScrollOffset / 1000f).coerceIn(0f, 1f)
-            }
+            if (listState.firstVisibleItemIndex > 0) 1f
+            else (listState.firstVisibleItemScrollOffset / 1000f).coerceIn(0f, 1f)
         }
     }
-    val animatedHeroProgress by animateFloatAsState(targetValue = heroScrollProgress, label = "heroScroll")
+
+    val animatedHeroProgress by animateFloatAsState(
+        targetValue = heroScrollProgress,
+        label = "heroScroll"
+    )
+
+    val heroMovie = remember(sections) {
+        sections
+            .firstOrNull { it.movieSectionType == MovieSectionType.TOP_RATED }
+            ?.state
+            ?.let { it as? UiState.Success }
+            ?.data
+            ?.maxByOrNull { it.voteAverage }
+    }
 
     MovieSearchBar(
         query = query,
@@ -124,10 +145,6 @@ private fun HomeScreenContent(
             ),
         state = listState
     ) {
-        val heroMovie = sections.firstOrNull { it.movieSectionType == MovieSectionType.TOP_RATED }
-            ?.state
-            ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
-
         item {
             heroMovie?.let {
                 HeroSection(
@@ -151,7 +168,6 @@ private fun HomeScreenContent(
     }
 }
 
-
 @Preview(showBackground = true, device = Devices.PIXEL_7)
 @Composable
 private fun HomeScreenLoadingPreview() {
@@ -161,40 +177,3 @@ private fun HomeScreenLoadingPreview() {
         )
     }
 }
-
-@Preview(showBackground = true, device = Devices.PIXEL_7)
-@Composable
-private fun HomeScreenSuccessPreview() {
-    TMDBTheme {
-        HomeScreenContent(
-            sections = listOf(),
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun HomeScreenErrorPreview() {
-    TMDBTheme {
-        HomeScreenContent(
-            sections = listOf(),
-        )
-    }
-}
-
-private val previewMovie = Movie(
-    isAdult = false,
-    backdropPath = "/7QirCB1o80NEFpQGlQRZerZbQEp.jpg",
-    genreIds = listOf(10749, 18),
-    id = 1,
-    originalLanguage = "es",
-    originalTitle = "Culpa nuestra",
-    overview = "Jenna and Lion's wedding brings about the long-awaited reunion between Noah and Nick after their breakup.",
-    popularity = 1096.6654,
-    posterPath = "/yzqHt4m1SeY9FbPrfZ0C2Hi9x1s.jpg",
-    releaseDate = "2025-10-15",
-    title = "Our Fault",
-    isVideo = false,
-    voteAverage = 7.854,
-    voteCount = 305
-)
