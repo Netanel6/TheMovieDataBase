@@ -35,7 +35,6 @@ import com.netanel.tmdb.core.ui.composables.MovieItem
 import com.netanel.tmdb.domain.models.Movie
 import com.netanel.tmdb.domain.models.MovieSection.MovieSectionType
 import com.netanel.tmdb.domain.models.UiState
-
 @Composable
 fun AllMoviesScreen(
     modifier: Modifier = Modifier,
@@ -46,24 +45,23 @@ fun AllMoviesScreen(
 ) {
     val vm: AllMoviesViewModel = hiltViewModel()
 
-    val movieListState by vm.moviesUiState.collectAsStateWithLifecycle()
-    val isLoadingMore by vm.isLoadingMore.collectAsStateWithLifecycle()
+    val state by vm.uiState.collectAsStateWithLifecycle()
 
-    // ✅ initial load
     LaunchedEffect(sectionType, query) {
-        vm.loadInitial(sectionType, query)
+        vm.onAction(AllMoviesViewModel.AllMoviesAction.LoadInitial(sectionType, query))
     }
 
     AllMoviesScreenContent(
         modifier = modifier,
-        title = sectionType?.title ?: (query ?: ""),
-        state = movieListState,
-        isLoadingMore = isLoadingMore,
-        onLoadMore = vm::loadNextPage,
+        title = sectionType?.title ?: (query.orEmpty()),
+        state = state.movies,
+        isLoadingMore = state.isLoadingMore,
+        onLoadMore = { vm.onAction(AllMoviesViewModel.AllMoviesAction.LoadNextPage) },
         onMovieDetailsClicked = onMovieDetailsClicked,
         onNavigateBack = onNavigateBack,
     )
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
