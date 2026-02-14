@@ -89,13 +89,11 @@ class AllMoviesViewModel @Inject constructor(
                 val newItems = response?.movies.orEmpty()
                 totalPages = response?.totalPages ?: totalPages
 
-                // אם אין פריטים – פשוט לעצור (לא להפוך Error)
                 if (newItems.isEmpty()) {
                     currentPage = nextPage // אופציונלי
                     return@launch
                 }
 
-                // ✅ למנוע כפילויות אבל לא לעצור טעינה רק כי היו כפילויות
                 val merged = (existing + newItems).distinctBy { it.id }
 
                 currentPage = nextPage

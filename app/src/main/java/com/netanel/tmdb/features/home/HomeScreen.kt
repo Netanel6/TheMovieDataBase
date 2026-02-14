@@ -41,29 +41,22 @@ fun HomeScreen(
 ) {
     val homeViewModel: HomeViewModel = hiltViewModel()
     val searchViewModel: SearchViewModel = hiltViewModel()
+    val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
-    val upcomingState by homeViewModel.upcomingUiState.collectAsStateWithLifecycle()
-    val nowPlayingState by homeViewModel.nowPlayingUiState.collectAsStateWithLifecycle()
-    val topRatedState by homeViewModel.topRatedUiState.collectAsStateWithLifecycle()
-    val popularState by homeViewModel.popularUiState.collectAsStateWithLifecycle()
 
     val query = searchViewModel.query.collectAsStateWithLifecycle().value
     val searchResultsState = searchViewModel.searchUiState.collectAsStateWithLifecycle().value
 
-    val sections = remember(
-        upcomingState,
-        nowPlayingState,
-        topRatedState,
-        popularState,
-        onMovieDetailsClicked
-    ) {
-        listOf(
-            MovieSection(MovieSectionType.UPCOMING, upcomingState, onMovieDetailsClicked),
-            MovieSection(MovieSectionType.NOW_PLAYING, nowPlayingState, onMovieDetailsClicked),
-            MovieSection(MovieSectionType.TOP_RATED, topRatedState, onMovieDetailsClicked),
-            MovieSection(MovieSectionType.POPULAR, popularState, onMovieDetailsClicked)
+    val sections = remember(uiState.upcoming, uiState.nowPlaying, uiState.topRated, uiState.popular) {
+        buildHomeSections(
+            upcoming = uiState.upcoming,
+            nowPlaying = uiState.nowPlaying,
+            topRated = uiState.topRated,
+            popular = uiState.popular,
+            onMovieClicked = onMovieDetailsClicked
         )
     }
+
 
     val searchResults = when (searchResultsState) {
         is UiState.Success -> searchResultsState.data
@@ -167,6 +160,20 @@ private fun HomeScreenContent(
         }
     }
 }
+
+private fun buildHomeSections(
+    upcoming: UiState<List<Movie>>,
+    nowPlaying: UiState<List<Movie>>,
+    topRated: UiState<List<Movie>>,
+    popular: UiState<List<Movie>>,
+    onMovieClicked: (Movie) -> Unit
+): List<MovieSection> = listOf(
+    MovieSection(MovieSectionType.UPCOMING, upcoming, onMovieClicked),
+    MovieSection(MovieSectionType.NOW_PLAYING, nowPlaying, onMovieClicked),
+    MovieSection(MovieSectionType.TOP_RATED, topRated, onMovieClicked),
+    MovieSection(MovieSectionType.POPULAR, popular, onMovieClicked)
+)
+
 
 @Preview(showBackground = true, device = Devices.PIXEL_7)
 @Composable
