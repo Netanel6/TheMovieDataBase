@@ -53,7 +53,7 @@ fun MovieSearchBar(
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = if(active) 0.dp else 16.dp),
 
         ) {
 

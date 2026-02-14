@@ -41,31 +41,35 @@ fun HomeScreen(
 ) {
     val homeViewModel: HomeViewModel = hiltViewModel()
     val searchViewModel: SearchViewModel = hiltViewModel()
+    val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
 
-    val upcomingState by homeViewModel.upcomingUiState.collectAsStateWithLifecycle()
-    val nowPlayingState by homeViewModel.nowPlayingUiState.collectAsStateWithLifecycle()
-    val topRatedState by homeViewModel.topRatedUiState.collectAsStateWithLifecycle()
-    val popularState by homeViewModel.popularUiState.collectAsStateWithLifecycle()
 
-    val query = searchViewModel.query.collectAsStateWithLifecycle().value
 
-    val searchResultsState = searchViewModel.searchUiState.collectAsStateWithLifecycle().value
-    val searchResults = when (searchResultsState) {
-        is UiState.Success -> searchResultsState.data
-        else -> emptyList()
+    val searchState by searchViewModel.uiState.collectAsStateWithLifecycle()
+
+    val sections = remember(uiState.upcoming, uiState.nowPlaying, uiState.topRated, uiState.popular) {
+        buildHomeSections(
+            upcoming = uiState.upcoming,
+            nowPlaying = uiState.nowPlaying,
+            topRated = uiState.topRated,
+            popular = uiState.popular,
+            onMovieClicked = onMovieDetailsClicked
+        )
     }
-    val sections = listOf(
-        MovieSection(MovieSectionType.UPCOMING, upcomingState, onMovieDetailsClicked),
-        MovieSection(MovieSectionType.NOW_PLAYING, nowPlayingState, onMovieDetailsClicked),
-        MovieSection(MovieSectionType.TOP_RATED, topRatedState, onMovieDetailsClicked),
-        MovieSection(MovieSectionType.POPULAR, popularState, onMovieDetailsClicked)
-    )
 
-    LaunchedEffect(query) {
-        if (query.isNotBlank()) {
-            delay(500)
-            searchViewModel.searchMovies()
+
+    val moviesResults = remember(searchState.results) {
+        when (val r = searchState.results) {
+            is UiState.Success -> r.data
+            else -> emptyList()
         }
+    }
+
+
+    LaunchedEffect(searchState.query) {
+        if (searchState.query.isBlank()) return@LaunchedEffect
+        delay(500)
+        searchViewModel.onAction(SearchViewModel.SearchAction.SearchClicked)
     }
 
 
@@ -74,10 +78,10 @@ fun HomeScreen(
         sections = sections,
         onMovieDetailsClicked = onMovieDetailsClicked,
         onViewAllClicked = onViewAllClicked,
-        query = query,
-        onQueryChange = { searchViewModel.onQueryChanged(it) },
-        onSearchClicked = { searchViewModel.searchMovies() },
-        moviesResults = searchResults
+        query = searchState.query,
+        onQueryChange = { searchViewModel.onAction(SearchViewModel.SearchAction.QueryChanged(it)) },
+        onSearchClicked = { searchViewModel.onAction(SearchViewModel.SearchAction.SearchClicked) },
+        moviesResults = moviesResults
     )
 }
 
@@ -92,17 +96,29 @@ private fun HomeScreenContent(
     onSearchClicked: () -> Unit = { },
     moviesResults: List<Movie> = emptyList()
 ) {
+
     val listState = rememberLazyListState()
+
     val heroScrollProgress by remember(listState) {
         derivedStateOf {
-            if (listState.firstVisibleItemIndex > 0) {
-                1f
-            } else {
-                (listState.firstVisibleItemScrollOffset / 1000f).coerceIn(0f, 1f)
-            }
+            if (listState.firstVisibleItemIndex > 0) 1f
+            else (listState.firstVisibleItemScrollOffset / 1000f).coerceIn(0f, 1f)
         }
     }
-    val animatedHeroProgress by animateFloatAsState(targetValue = heroScrollProgress, label = "heroScroll")
+
+    val animatedHeroProgress by animateFloatAsState(
+        targetValue = heroScrollProgress,
+        label = "heroScroll"
+    )
+
+    val heroMovie = remember(sections) {
+        sections
+            .firstOrNull { it.movieSectionType == MovieSectionType.TOP_RATED }
+            ?.state
+            ?.let { it as? UiState.Success }
+            ?.data
+            ?.maxByOrNull { it.voteAverage }
+    }
 
     MovieSearchBar(
         query = query,
@@ -124,10 +140,6 @@ private fun HomeScreenContent(
             ),
         state = listState
     ) {
-        val heroMovie = sections.firstOrNull { it.movieSectionType == MovieSectionType.TOP_RATED }
-            ?.state
-            ?.let { (it as? UiState.Success)?.data?.maxByOrNull { movie -> movie.voteAverage } }
-
         item {
             heroMovie?.let {
                 HeroSection(
@@ -151,6 +163,19 @@ private fun HomeScreenContent(
     }
 }
 
+private fun buildHomeSections(
+    upcoming: UiState<List<Movie>>,
+    nowPlaying: UiState<List<Movie>>,
+    topRated: UiState<List<Movie>>,
+    popular: UiState<List<Movie>>,
+    onMovieClicked: (Movie) -> Unit
+): List<MovieSection> = listOf(
+    MovieSection(MovieSectionType.UPCOMING, upcoming, onMovieClicked),
+    MovieSection(MovieSectionType.NOW_PLAYING, nowPlaying, onMovieClicked),
+    MovieSection(MovieSectionType.TOP_RATED, topRated, onMovieClicked),
+    MovieSection(MovieSectionType.POPULAR, popular, onMovieClicked)
+)
+
 
 @Preview(showBackground = true, device = Devices.PIXEL_7)
 @Composable
@@ -161,40 +186,3 @@ private fun HomeScreenLoadingPreview() {
         )
     }
 }
-
-@Preview(showBackground = true, device = Devices.PIXEL_7)
-@Composable
-private fun HomeScreenSuccessPreview() {
-    TMDBTheme {
-        HomeScreenContent(
-            sections = listOf(),
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun HomeScreenErrorPreview() {
-    TMDBTheme {
-        HomeScreenContent(
-            sections = listOf(),
-        )
-    }
-}
-
-private val previewMovie = Movie(
-    isAdult = false,
-    backdropPath = "/7QirCB1o80NEFpQGlQRZerZbQEp.jpg",
-    genreIds = listOf(10749, 18),
-    id = 1,
-    originalLanguage = "es",
-    originalTitle = "Culpa nuestra",
-    overview = "Jenna and Lion's wedding brings about the long-awaited reunion between Noah and Nick after their breakup.",
-    popularity = 1096.6654,
-    posterPath = "/yzqHt4m1SeY9FbPrfZ0C2Hi9x1s.jpg",
-    releaseDate = "2025-10-15",
-    title = "Our Fault",
-    isVideo = false,
-    voteAverage = 7.854,
-    voteCount = 305
-)

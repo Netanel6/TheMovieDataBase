@@ -9,50 +9,62 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-/**
- * Created by netanelamar on 12/11/2025.
- * NetanelCA2@gmail.com
- */
 @HiltViewModel
-class SearchViewModel @Inject constructor(val searchUseCase: SearchUseCase) : ViewModel() {
+class SearchViewModel @Inject constructor(
+    private val searchUseCase: SearchUseCase
+) : ViewModel() {
 
-    private val _searchUiState: MutableStateFlow<UiState<List<Movie>>> =
-        MutableStateFlow(UiState.Loading)
-    val searchUiState: StateFlow<UiState<List<Movie>>> = _searchUiState.asStateFlow()
+    data class SearchUiState(
+        val query: String = "",
+        val results: UiState<List<Movie>> = UiState.Success(emptyList())
+    )
 
-    private val searchQuery = MutableStateFlow("")
-    val query: StateFlow<String> = searchQuery.asStateFlow()
+    sealed interface SearchAction {
+        data class QueryChanged(val value: String) : SearchAction
+        data object SearchClicked : SearchAction
+        data object Clear : SearchAction
+    }
 
+    private val _uiState = MutableStateFlow(SearchUiState())
+    val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
 
-    fun onQueryChanged(newQuery: String) {
-        searchQuery.value = newQuery
-        if (newQuery.isBlank()) {
-            _searchUiState.value = UiState.Success(emptyList())
+    fun onAction(action: SearchAction) {
+        when (action) {
+            is SearchAction.QueryChanged -> onQueryChangedInternal(action.value)
+            SearchAction.SearchClicked -> searchMoviesInternal()
+            SearchAction.Clear -> clearInternal()
         }
     }
 
-    fun searchMovies() {
+    private fun onQueryChangedInternal(newQuery: String) {
+        _uiState.update { state ->
+            val trimmed = newQuery
+            if (trimmed.isBlank()) state.copy(query = trimmed, results = UiState.Success(emptyList()))
+            else state.copy(query = trimmed)
+        }
+    }
+
+    private fun clearInternal() {
+        _uiState.value = SearchUiState()
+    }
+
+    private fun searchMoviesInternal() {
         viewModelScope.launch {
-            val currentQuery = searchQuery.value.trim()
-            if (currentQuery.isEmpty()) {
-                _searchUiState.value = UiState.Success(emptyList())
+            val query = _uiState.value.query.trim()
+            if (query.isEmpty()) {
+                _uiState.update { it.copy(results = UiState.Success(emptyList())) }
                 return@launch
             }
 
-            _searchUiState.value = UiState.Loading
+            _uiState.update { it.copy(results = UiState.Loading) }
 
-            try {
-                val response = searchUseCase.invoke(query = currentQuery,  page = 1)
-                _searchUiState.value = UiState.Success(
-                    data = response?.movies ?: emptyList()
-                )
-            } catch (e: Exception) {
-                _searchUiState.value = UiState.Error(e.message ?: "Unexpected error")
-            }
+            runCatching { searchUseCase.invoke(query = query, page = 1)?.movies.orEmpty() }
+                .onSuccess { movies -> _uiState.update { it.copy(results = UiState.Success(movies)) } }
+                .onFailure { e -> _uiState.update { it.copy(results = UiState.Error(e.message ?: "Unexpected error")) } }
         }
     }
 }

@@ -15,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,82 +28,111 @@ class AllMoviesViewModel @Inject constructor(
     private val searchUseCase: SearchUseCase,
 ) : ViewModel() {
 
-    private val _moviesUiState = MutableStateFlow<UiState<List<Movie>>>(UiState.Loading)
-    val moviesUiState: StateFlow<UiState<List<Movie>>> = _moviesUiState.asStateFlow()
+    data class AllMoviesUiState(
+        val section: MovieSection.MovieSectionType? = null,
+        val query: String? = null,
+        val movies: UiState<List<Movie>> = UiState.Loading,
+        val isLoadingMore: Boolean = false,
+        val currentPage: Int = 1,
+        val totalPages: Int = Int.MAX_VALUE
+    )
 
-    private val _isLoadingMore = MutableStateFlow(false)
-    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+    sealed interface AllMoviesAction {
+        data class LoadInitial(
+            val section: MovieSection.MovieSectionType?,
+            val query: String?
+        ) : AllMoviesAction
 
-    private var currentPage = 1
-    private var totalPages = Int.MAX_VALUE
+        data object LoadNextPage : AllMoviesAction
+        data object Retry : AllMoviesAction
+    }
 
-    private var currentSection: MovieSection.MovieSectionType? = null
-    private var currentQuery: String? = null
+    private val _uiState = MutableStateFlow(AllMoviesUiState())
+    val uiState: StateFlow<AllMoviesUiState> = _uiState.asStateFlow()
 
-    fun loadInitial(movieSection: MovieSection.MovieSectionType?, query: String?) {
-        currentSection = movieSection
-        currentQuery = query
+    fun onAction(action: AllMoviesAction) {
+        when (action) {
+            is AllMoviesAction.LoadInitial -> loadInitialInternal(action.section, action.query)
+            AllMoviesAction.LoadNextPage -> loadNextPageInternal()
+            AllMoviesAction.Retry -> loadInitialInternal(_uiState.value.section, _uiState.value.query)
+        }
+    }
 
-        currentPage = 1
-        totalPages = Int.MAX_VALUE
-
-        _isLoadingMore.value = false
-        _moviesUiState.value = UiState.Loading
+    private fun loadInitialInternal(section: MovieSection.MovieSectionType?, query: String?) {
+        _uiState.update {
+            it.copy(
+                section = section,
+                query = query,
+                movies = UiState.Loading,
+                isLoadingMore = false,
+                currentPage = 1,
+                totalPages = Int.MAX_VALUE
+            )
+        }
 
         viewModelScope.launch {
-            try {
-                val response = fetchPageResponse(
-                    page = 1,
-                    section = currentSection,
-                    query = currentQuery
-                )
-
+            runCatching {
+                fetchPageResponse(page = 1, section = section, query = query)
+            }.onSuccess { response ->
                 val movies = response?.movies.orEmpty().distinctBy { it.id }
-                totalPages = response?.totalPages ?: 1
+                val totalPages = response?.totalPages ?: 1
 
-                _moviesUiState.value = UiState.Success(movies)
-            } catch (e: Exception) {
-                _moviesUiState.value = UiState.Error(e.message ?: "Unexpected error")
+                _uiState.update {
+                    it.copy(
+                        movies = UiState.Success(movies),
+                        currentPage = 1,
+                        totalPages = totalPages
+                    )
+                }
+            }.onFailure { e ->
+                _uiState.update { it.copy(movies = UiState.Error(e.message ?: "Unexpected error")) }
             }
         }
     }
 
-    fun loadNextPage() {
-        if (_isLoadingMore.value) return
-        if (currentPage >= totalPages) return
+    private fun loadNextPageInternal() {
+        val state = _uiState.value
+        if (state.isLoadingMore) return
+        if (state.currentPage >= state.totalPages) return
 
-        val existing = (moviesUiState.value as? UiState.Success)?.data.orEmpty()
+        val existing = (state.movies as? UiState.Success)?.data.orEmpty()
         if (existing.isEmpty()) return
 
-        _isLoadingMore.value = true
+        _uiState.update { it.copy(isLoadingMore = true) }
 
         viewModelScope.launch {
             try {
-                val nextPage = currentPage + 1
+                val nextPage = state.currentPage + 1
 
                 val response = fetchPageResponse(
                     page = nextPage,
-                    section = currentSection,
-                    query = currentQuery
+                    section = state.section,
+                    query = state.query
                 )
 
                 val newItems = response?.movies.orEmpty()
-                totalPages = response?.totalPages ?: totalPages
+                val newTotalPages = response?.totalPages ?: state.totalPages
 
-                // אם אין פריטים – פשוט לעצור (לא להפוך Error)
                 if (newItems.isEmpty()) {
-                    currentPage = nextPage // אופציונלי
+                    // keep page as-is; no need to advance if nothing arrived
+                    _uiState.update { it.copy(totalPages = newTotalPages) }
                     return@launch
                 }
 
-                // ✅ למנוע כפילויות אבל לא לעצור טעינה רק כי היו כפילויות
                 val merged = (existing + newItems).distinctBy { it.id }
 
-                currentPage = nextPage
-                _moviesUiState.value = UiState.Success(merged)
-
+                _uiState.update {
+                    it.copy(
+                        movies = UiState.Success(merged),
+                        currentPage = nextPage,
+                        totalPages = newTotalPages
+                    )
+                }
+            } catch (e: Exception) {
+                // Important: don’t swallow paging errors silently
+                _uiState.update { it.copy(movies = UiState.Error(e.message ?: "Unexpected error")) }
             } finally {
-                _isLoadingMore.value = false
+                _uiState.update { it.copy(isLoadingMore = false) }
             }
         }
     }

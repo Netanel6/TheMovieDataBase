@@ -13,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,94 +22,92 @@ import javax.inject.Inject
  * Created by netanelamar on 23/10/2025.
  * NetanelCA2@gmail.com
  */
-
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getUpcomingUseCase: GetUpcomingUseCase,
     private val getNowPlayingUseCase: GetNowPlayingUseCase,
     private val getPopularUseCase: GetPopularUseCase,
     private val getTopRatedUseCase: GetTopRatedUseCase
-) :
-    ViewModel() {
+) : ViewModel() {
 
-    private val _upcomingUiState: MutableStateFlow<UiState<List<Movie>>> =
-        MutableStateFlow(UiState.Loading)
-    val upcomingUiState: StateFlow<UiState<List<Movie>>> = _upcomingUiState.asStateFlow()
+    data class HomeUiState(
+        val upcoming: UiState<List<Movie>> = UiState.Loading,
+        val nowPlaying: UiState<List<Movie>> = UiState.Loading,
+        val topRated: UiState<List<Movie>> = UiState.Loading,
+        val popular: UiState<List<Movie>> = UiState.Loading
+    )
 
-    private val _nowPlayingUiState: MutableStateFlow<UiState<List<Movie>>> =
-        MutableStateFlow(UiState.Loading)
-    val nowPlayingUiState: StateFlow<UiState<List<Movie>>> = _nowPlayingUiState.asStateFlow()
+    sealed interface HomeAction {
+        data object LoadAll : HomeAction
+        data object RetryUpcoming : HomeAction
+        data object RetryNowPlaying : HomeAction
+        data object RetryTopRated : HomeAction
+        data object RetryPopular : HomeAction
+    }
 
-    private val _topRatedUiState: MutableStateFlow<UiState<List<Movie>>> =
-        MutableStateFlow(UiState.Loading)
-    val topRatedUiState: StateFlow<UiState<List<Movie>>> = _topRatedUiState.asStateFlow()
-
-    private val _popularUiState: MutableStateFlow<UiState<List<Movie>>> =
-        MutableStateFlow(UiState.Loading)
-    val popularUiState: StateFlow<UiState<List<Movie>>> = _popularUiState.asStateFlow()
-
-    private val _movieDetails: MutableStateFlow<UiState<MovieDetailsResponse>> =
-        MutableStateFlow(UiState.Loading)
-    val movieDetails: StateFlow<UiState<MovieDetailsResponse>> = _movieDetails.asStateFlow()
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
-        loadUpcomingMovies()
-        loadNowPlayingMovies()
-        loadPopularMovies()
-        loadTopRatedMovies()
+        onAction(HomeAction.LoadAll)
     }
 
-    private fun loadUpcomingMovies() {
-        viewModelScope.launch {
-            try {
-                val movies = getUpcomingUseCase.invoke(1)
-                _upcomingUiState.value = UiState.Success(
-                    data = movies?.movies ?: emptyList()
-                )
-            } catch (e: Exception) {
-                _upcomingUiState.value = UiState.Error(e.message ?: "Unexpected error")
-            }
+    fun onAction(action: HomeAction) {
+        when (action) {
+            HomeAction.LoadAll -> loadAll()
+            HomeAction.RetryUpcoming -> loadUpcoming()
+            HomeAction.RetryNowPlaying -> loadNowPlaying()
+            HomeAction.RetryTopRated -> loadTopRated()
+            HomeAction.RetryPopular -> loadPopular()
         }
     }
 
-    private fun loadNowPlayingMovies() {
-        viewModelScope.launch {
-            try {
-                val movies = getNowPlayingUseCase.invoke(1)
-                _nowPlayingUiState.value = UiState.Success(
-                    data = movies?.movies ?: emptyList()
-                )
-            } catch (e: Exception) {
-                _nowPlayingUiState.value = UiState.Error(e.message ?: "Unexpected error")
-            }
-        }
+    private fun loadAll() {
+        loadUpcoming()
+        loadNowPlaying()
+        loadTopRated()
+        loadPopular()
     }
 
-    private fun loadTopRatedMovies() {
-        viewModelScope.launch {
-            try {
-                val movies = getTopRatedUseCase.invoke(1)
-                _topRatedUiState.value = UiState.Success(
-                    data = movies?.movies ?: emptyList()
-                )
-            } catch (e: Exception) {
-                _topRatedUiState.value = UiState.Error(e.message ?: "Unexpected error")
-            }
-        }
-    }
+    private fun loadUpcoming() = loadSection(
+        setLoading = { _uiState.update { it.copy(upcoming = UiState.Loading) } },
+        setSuccess = { movies -> _uiState.update { it.copy(upcoming = UiState.Success(movies)) } },
+        setError = { msg -> _uiState.update { it.copy(upcoming = UiState.Error(msg)) } },
+        loader = { getUpcomingUseCase.invoke(1)?.movies.orEmpty() }
+    )
 
-    private fun loadPopularMovies() {
+    private fun loadNowPlaying() = loadSection(
+        setLoading = { _uiState.update { it.copy(nowPlaying = UiState.Loading) } },
+        setSuccess = { movies -> _uiState.update { it.copy(nowPlaying = UiState.Success(movies)) } },
+        setError = { msg -> _uiState.update { it.copy(nowPlaying = UiState.Error(msg)) } },
+        loader = { getNowPlayingUseCase.invoke(1)?.movies.orEmpty() }
+    )
+
+    private fun loadTopRated() = loadSection(
+        setLoading = { _uiState.update { it.copy(topRated = UiState.Loading) } },
+        setSuccess = { movies -> _uiState.update { it.copy(topRated = UiState.Success(movies)) } },
+        setError = { msg -> _uiState.update { it.copy(topRated = UiState.Error(msg)) } },
+        loader = { getTopRatedUseCase.invoke(1)?.movies.orEmpty() }
+    )
+
+    private fun loadPopular() = loadSection(
+        setLoading = { _uiState.update { it.copy(popular = UiState.Loading) } },
+        setSuccess = { movies -> _uiState.update { it.copy(popular = UiState.Success(movies)) } },
+        setError = { msg -> _uiState.update { it.copy(popular = UiState.Error(msg)) } },
+        loader = { getPopularUseCase.invoke(1)?.movies.orEmpty() }
+    )
+
+    private fun loadSection(
+        setLoading: () -> Unit,
+        setSuccess: (List<Movie>) -> Unit,
+        setError: (String) -> Unit,
+        loader: suspend () -> List<Movie>
+    ) {
         viewModelScope.launch {
-            try {
-                val movies = getPopularUseCase.invoke(1)
-                _popularUiState.value = UiState.Success(
-                    data = movies?.movies ?: emptyList()
-                )
-            } catch (e: Exception) {
-                _popularUiState.value = UiState.Error(e.message ?: "Unexpected error")
-            }
+            setLoading()
+            runCatching { loader() }
+                .onSuccess(setSuccess)
+                .onFailure { setError(it.message ?: "Unexpected error") }
         }
     }
 }
-
-
