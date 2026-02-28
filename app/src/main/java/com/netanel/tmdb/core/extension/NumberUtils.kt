@@ -8,7 +8,7 @@ import kotlin.math.roundToInt
  * NetanelCA2@gmail.com
  */
 
-fun Double.formatToOneDecimalPlace(){
-    this.takeIf { it > 0.0 }
-        ?.let { ((it * 10).roundToInt() / 10.0).toString() }
+fun Double.formatToOneDecimalPlace(): String? {
+    return this.takeIf { this > 0.0 }
+        ?.let { ((this * 10).roundToInt() / 10.0).toString() }
 }

@@ -29,6 +29,7 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.netanel.tmdb.R
 import com.netanel.tmdb.core.extension.formatToOneDecimalPlace
+import com.netanel.tmdb.core.extension.formattedYear
 import com.netanel.tmdb.core.extension.toImageUrl
 import com.netanel.tmdb.domain.models.Movie
 
@@ -47,7 +48,7 @@ fun MovieItem(
 ) {
     val shape = RoundedCornerShape(16.dp)
     val posterUrl = movie.posterPath?.toImageUrl()
-    val year = movie.releaseDate
+    val year = movie.releaseDate.formattedYear()
     val ratingText = movie.voteAverage.formatToOneDecimalPlace()
 
 
@@ -93,48 +94,20 @@ fun MovieItem(
 
 
                 // Rating chip (top-right)
-                if (ratingText != null) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(10.dp)
-                            .clip(RoundedCornerShape(999.dp))
-                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = "★ $ratingText",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-
-                // Title + year (bottom)
-                Column(
+                Box(
                     modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(12.dp)
+                        .align(Alignment.TopEnd)
+                        .padding(10.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = movie.title,
-                        style = MaterialTheme.typography.titleSmall,
+                        text = "★ $ratingText",
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        fontWeight = FontWeight.SemiBold
                     )
-                    if (!year.isNullOrBlank()) {
-                        Spacer(Modifier.height(2.dp))
-                        Text(
-                            text = year,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
                 }
 
                 // Bottom gradient overlay
@@ -152,6 +125,32 @@ fun MovieItem(
                             )
                         )
                 )
+
+                // Title + year (bottom)
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(12.dp)
+                ) {
+                    Text(
+                        text = movie.title,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    year?.let { year ->
+                        Text(
+                            text = year,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
             }
         }
     }

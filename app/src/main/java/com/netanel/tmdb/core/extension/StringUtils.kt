@@ -8,6 +8,10 @@ import com.netanel.tmdb.domain.Constants
  * NetanelCA2@gmail.com
  */
 
-fun String?.toImageUrl() {
-    this?.let { Constants.IMAGES_URL + it }
+fun String?.toImageUrl(): String {
+    return  this.let { Constants.IMAGES_URL + this }
+}
+
+fun String?.formattedYear(): String? {
+    return this?.takeIf { this.length >= 4 }?.take(4)
 }
