@@ -1,5 +1,6 @@
 package com.netanel.tmdb.domain.useCase.movie
 
+import com.netanel.tmdb.domain.BaseResponse
 import com.netanel.tmdb.domain.models.MovieResponse
 import com.netanel.tmdb.domain.repository.MovieRepository
 import javax.inject.Inject
@@ -13,7 +14,9 @@ class GetNowPlayingUseCase @Inject constructor(
     private val repository: MovieRepository
 ) {
     suspend operator fun invoke(page: Int): MovieResponse? {
-        val movies = repository.getNowPlayingMovies(page)
-        return movies
+        return when(val result = repository.getNowPlayingMovies(page)){
+            is BaseResponse.Error -> null
+            is BaseResponse.Success -> result.data
+        }
     }
 }
