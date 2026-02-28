@@ -14,8 +14,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.netanel.tmdb.domain.models.Movie
+import com.netanel.tmdb.R
 import com.netanel.tmdb.domain.models.MovieSection
 import com.netanel.tmdb.domain.models.MovieSection.MovieSectionType
 import com.netanel.tmdb.domain.models.UiState
@@ -44,7 +45,7 @@ fun HorizontalMoviesList(section: MovieSection, onViewAllClicked: (MovieSectionT
                         modifier = Modifier.clickable {
                             onViewAllClicked(section.movieSectionType, null)
                         },
-                        text = "View All",
+                        text = stringResource(R.string.view_all),
                         style = MaterialTheme.typography.bodySmall
                     )
                 }

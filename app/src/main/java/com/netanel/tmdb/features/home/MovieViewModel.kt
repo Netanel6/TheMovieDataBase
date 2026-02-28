@@ -2,8 +2,9 @@ package com.netanel.tmdb.features.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.netanel.tmdb.core.navigation.MovieSectionType
 import com.netanel.tmdb.domain.models.Movie
-import com.netanel.tmdb.domain.models.MovieDetailsResponse
+import com.netanel.tmdb.domain.models.MovieSection
 import com.netanel.tmdb.domain.models.UiState
 import com.netanel.tmdb.domain.useCase.movie.GetNowPlayingUseCase
 import com.netanel.tmdb.domain.useCase.movie.GetPopularUseCase
@@ -38,11 +39,10 @@ class HomeViewModel @Inject constructor(
     )
 
     sealed interface HomeAction {
-        data object LoadAll : HomeAction
-        data object RetryUpcoming : HomeAction
-        data object RetryNowPlaying : HomeAction
-        data object RetryTopRated : HomeAction
-        data object RetryPopular : HomeAction
+
+
+        object LoadAll : HomeAction
+        data class Retry(val sectionType: MovieSectionType) : HomeAction
     }
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -55,10 +55,15 @@ class HomeViewModel @Inject constructor(
     fun onAction(action: HomeAction) {
         when (action) {
             HomeAction.LoadAll -> loadAll()
-            HomeAction.RetryUpcoming -> loadUpcoming()
-            HomeAction.RetryNowPlaying -> loadNowPlaying()
-            HomeAction.RetryTopRated -> loadTopRated()
-            HomeAction.RetryPopular -> loadPopular()
+            // TODO: Move via HorizontalMoviesList
+            is HomeAction.Retry ->
+                when (action.sectionType) {
+                    MovieSection.MovieSectionType.UPCOMING -> loadUpcoming()
+                    MovieSection.MovieSectionType.NOW_PLAYING -> loadNowPlaying()
+                    MovieSection.MovieSectionType.TOP_RATED -> loadTopRated()
+                    MovieSection.MovieSectionType.POPULAR -> loadPopular()
+                    MovieSection.MovieSectionType.DEFAULT -> loadAll()
+                }
         }
     }
 
@@ -110,4 +115,9 @@ class HomeViewModel @Inject constructor(
                 .onFailure { setError(it.message ?: "Unexpected error") }
         }
     }
+}
+
+
+enum class HomeSectionType {
+    NowPlaying, Popular, Upcoming, TopRated
 }

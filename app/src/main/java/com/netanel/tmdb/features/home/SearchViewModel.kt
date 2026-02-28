@@ -42,9 +42,8 @@ class SearchViewModel @Inject constructor(
 
     private fun onQueryChangedInternal(newQuery: String) {
         _uiState.update { state ->
-            val trimmed = newQuery
-            if (trimmed.isBlank()) state.copy(query = trimmed, results = UiState.Success(emptyList()))
-            else state.copy(query = trimmed)
+            if (newQuery.isBlank()) state.copy(query = newQuery, results = UiState.Success(emptyList()))
+            else state.copy(query = newQuery)
         }
     }
 
