@@ -21,6 +21,7 @@ glide = "4.16.0"
 glideCompose = "1.0.0-beta01"
 navVersion = "2.9.5"
 kotlinx-parcelize = "1.9.21"
+material3 = "1.4.0"
 
 [libraries]
 # Core & Compose Base
@@ -76,6 +77,7 @@ glide-ksp = { group = "com.github.bumptech.glide", name = "compiler", version.re
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
