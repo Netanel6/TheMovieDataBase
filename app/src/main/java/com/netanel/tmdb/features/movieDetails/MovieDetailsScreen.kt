@@ -30,6 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.netanel.tmdb.core.extension.toImageUrl
 import com.netanel.tmdb.domain.Constants
 import com.netanel.tmdb.domain.models.MovieDetailsResponse
 import com.netanel.tmdb.domain.models.UiState
@@ -69,7 +70,7 @@ fun MovieDetailsContent(data: MovieDetailsResponse) {
             .height(400.dp)
     ) {
         GlideImage(
-            model = Constants.IMAGES_URL + data.backdropPath,
+            model = data.backdropPath.toImageUrl(),
             contentDescription = data.title,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Inside
