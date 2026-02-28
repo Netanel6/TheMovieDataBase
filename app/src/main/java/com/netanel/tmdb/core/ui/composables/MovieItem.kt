@@ -1,32 +1,36 @@
 package com.netanel.tmdb.core.ui.composables
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Card
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.netanel.tmdb.domain.Constants
+import com.netanel.tmdb.R
+import com.netanel.tmdb.core.extension.formatToOneDecimalPlace
+import com.netanel.tmdb.core.extension.formattedYear
+import com.netanel.tmdb.core.extension.toImageUrl
 import com.netanel.tmdb.domain.models.Movie
 
 
@@ -35,48 +39,122 @@ import com.netanel.tmdb.domain.models.Movie
  * NetanelCA2@gmail.com
  */
 
-
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun MovieItem(movie: Movie, onMovieDetailsClicked: (Movie) -> Unit) {
-    Card(
-        modifier = Modifier
-            .wrapContentSize()
+fun MovieItem(
+    movie: Movie,
+    onMovieDetailsClicked: (Movie) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(16.dp)
+    val posterUrl = movie.posterPath?.toImageUrl()
+    val year = movie.releaseDate.formattedYear()
+    val ratingText = movie.voteAverage.formatToOneDecimalPlace()
+
+
+    Surface(
+        modifier = modifier
             .padding(4.dp)
-            .border(
-                border = BorderStroke(0.3.dp, Color.White),
-                shape = RoundedCornerShape(12.dp)
-            )
+            .width(140.dp)
+            .clickable { onMovieDetailsClicked(movie) },
+        shape = shape,
+        tonalElevation = 2.dp,
+        shadowElevation = 8.dp
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            val posterPath = movie.posterPath
-            if (posterPath != null) {
-                GlideImage(
-                    model = Constants.IMAGES_URL + posterPath,
-                    contentDescription = movie.title,
-                    modifier = Modifier.size(width = 120.dp, height = 180.dp).clickable { onMovieDetailsClicked(movie) },
-                    alignment = Alignment.Center,
-                    contentScale = ContentScale.Crop
-                )
-            } else {
+        Column {
+            // Poster
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(210.dp)
+                    .clip(shape)
+            ) {
+                if (posterUrl != null) {
+                    GlideImage(
+                        model = posterUrl,
+                        contentDescription = movie.title,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    // Placeholder
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.no_poster),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+
+                // Rating chip (top-right)
                 Box(
                     modifier = Modifier
-                        .size(width = 120.dp, height = 180.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentAlignment = Alignment.Center
+                        .align(Alignment.TopEnd)
+                        .padding(10.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = "No image",
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(8.dp),
-                        textAlign = TextAlign.Center
+                        text = "★ $ratingText",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold
                     )
+                }
+
+                // Bottom gradient overlay
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(90.dp)
+                        .align(Alignment.BottomCenter)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.surface.copy(alpha = 0f),
+                                    MaterialTheme.colorScheme.surface.copy(alpha = 1f)
+                                )
+                            )
+                        )
+                )
+
+                // Title + year (bottom)
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(12.dp)
+                ) {
+                    Text(
+                        text = movie.title,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    year?.let { year ->
+                        Text(
+                            text = year,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

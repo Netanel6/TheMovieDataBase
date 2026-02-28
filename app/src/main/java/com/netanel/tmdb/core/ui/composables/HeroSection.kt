@@ -24,7 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.netanel.tmdb.domain.Constants
+import com.netanel.tmdb.core.extension.toImageUrl
 import com.netanel.tmdb.domain.models.Movie
 
 @OptIn(ExperimentalGlideComposeApi::class)
@@ -45,7 +45,7 @@ fun HeroSection(
         val backdrop = highlightedMovie?.backdropPath
         if (backdrop != null) {
             GlideImage(
-                model = Constants.IMAGES_URL + backdrop,
+                model = backdrop.toImageUrl(),
                 contentDescription = highlightedMovie.title,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
