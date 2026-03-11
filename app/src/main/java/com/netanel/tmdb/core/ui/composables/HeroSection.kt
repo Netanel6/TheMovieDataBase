@@ -19,6 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -101,5 +103,19 @@ fun HeroSection(
                 }
             }
         }
+    }
+}
+
+fun Modifier.heroGarageDoorEffect(progress: Float): Modifier {
+    return graphicsLayer {
+        val p = progress.coerceIn(0f, 1f)
+
+        transformOrigin = TransformOrigin(0.5f, 0f)
+        cameraDistance = 24f * density
+        rotationX = 70f * p
+        scaleX = 1f - (0.08f * p)
+        scaleY = 1f - (0.12f * p)
+        translationY = -120f * p
+        alpha = 1f - (0.25f * p)
     }
 }

@@ -1,19 +1,18 @@
 package com.netanel.tmdb.features.home
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.netanel.tmdb.core.ui.composables.HeroSection
 import com.netanel.tmdb.core.ui.composables.HorizontalMoviesList
 import com.netanel.tmdb.core.ui.composables.MovieSearchBar
+import com.netanel.tmdb.core.ui.composables.heroGarageDoorEffect
 import com.netanel.tmdb.core.ui.theme.TMDBTheme
 import com.netanel.tmdb.domain.models.Movie
 import com.netanel.tmdb.domain.models.MovieSection
@@ -144,13 +144,7 @@ private fun HomeScreenContent(
             heroMovie?.let {
                 HeroSection(
                     movie = it,
-                    modifier = Modifier.graphicsLayer {
-                        val clampedProgress = animatedHeroProgress.coerceIn(0f, 1f)
-                        alpha = (1f - (clampedProgress * 0.35f)).coerceIn(0.6f, 1f)
-                        scaleX = 1f - (clampedProgress * 1f)
-                        scaleY = 1f - (clampedProgress * 1f)
-                        translationY = clampedProgress * -80f
-                    }
+                    modifier = Modifier.heroGarageDoorEffect(animatedHeroProgress)
                 ) { clickedMovie ->
                     onMovieDetailsClicked(clickedMovie)
                 }
